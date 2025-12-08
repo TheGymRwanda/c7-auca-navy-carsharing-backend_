@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "type": "node-terminal",
+            "name": "Debug Nest.JS app",
+            "request": "launch",
+            "command": "npm run start:dev",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Debug tests",
+            "request": "launch",
+            "command": "npm run test:jest",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

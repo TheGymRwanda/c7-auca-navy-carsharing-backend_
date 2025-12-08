@@ -1,0 +1,5 @@
+export * from './car-type'
+export * from './car-type-not-found.error'
+export * from './car-type.repository.interface'
+export * from './car-type.service'
+export * from './car-type.service.interface'
