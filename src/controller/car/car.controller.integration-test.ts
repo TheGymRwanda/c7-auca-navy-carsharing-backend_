@@ -153,15 +153,37 @@ describe('CarController', () => {
     })
   })
 
-  // Re-enable this test when you're implementing "Rights and Roles - Module 1".
-  //NOT IMPLEMENTED
-  describe.skip('create', () => {
-    it('should fail if the user is not an administrator', async () => {})
-
-    //NOT IMPLEMENTED
-    it('should create a new car type if the user is an administrator', () => {
-      // TODO: You have to turn the user into an administrator here for the test to pass!
+  describe('create', () => {
+    it('should create a new car', async () => {
+      const newCar = new CarBuilder().withId(27).build()
+      carServiceMock.create.mockResolvedValue(newCar)
       authenticationGuardMock.user = UserBuilder.from(user).build()
+
+      await request(app.getHttpServer())
+        .post(`/cars`)
+        .send({
+          carTypeId: newCar.id,
+          name: newCar.name,
+          ownerId: newCar.ownerId,
+          state: newCar.state,
+          fuelType: newCar.fuelType,
+          horsepower: newCar.horsepower,
+          licensePlate: newCar.licensePlate,
+          info: newCar.info,
+        })
+        .expect(HttpStatus.CREATED)
+        .expect({ ...newCar })
+
+      expect(carServiceMock.create).toHaveBeenCalledWith({
+        carTypeId: newCar.id,
+        name: newCar.name,
+        ownerId: newCar.ownerId,
+        state: newCar.state,
+        fuelType: newCar.fuelType,
+        horsepower: newCar.horsepower,
+        licensePlate: newCar.licensePlate,
+        info: newCar.info,
+      })
     })
   })
 })
