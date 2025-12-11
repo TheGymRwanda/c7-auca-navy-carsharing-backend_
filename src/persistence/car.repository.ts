@@ -10,7 +10,7 @@ import {
   type ICarRepository,
   type UserID,
 } from '../application'
-import { Car } from '../application/car'
+import { Car, CarNotFoundError } from '../application/car'
 
 import { type Transaction } from './database-connection.interface'
 
@@ -67,7 +67,28 @@ export class CarRepository implements ICarRepository {
   }
 
   public async update(_tx: Transaction, _car: Car): Promise<Car> {
-    throw new Error('Not implemented')
+    const row = await _tx.oneOrNone<Row>(
+      `
+      UPDATE cars SET
+        car_type_id =  $(car_type_id),
+        name = $(name),
+        owner_id = $(owner_id),
+        state =  $(state),
+        fuel_type = $(fuel_type),
+        horsepower = $(horsepower),
+        license_plate = $(license_plate),
+        info = $(info)
+      WHERE id = $(id)
+      RETURNING *
+      `,
+      { ..._car },
+    )
+
+    if (row === null) {
+      throw new CarNotFoundError(_car.id)
+    }
+
+    return rowToDomain(row)
   }
 
   public async insert(
