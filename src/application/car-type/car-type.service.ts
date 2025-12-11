@@ -75,6 +75,7 @@ export class CarTypeService implements ICarTypeService {
     return result
   }
 
+  //only exception where the application layer has knowledge that there is a database layer.
   public async get(id: CarTypeID): Promise<CarType> {
     // This code does essentially the same thing as the code above (except that it returns one car type instead of many),
     // but it is written much more concisely.
