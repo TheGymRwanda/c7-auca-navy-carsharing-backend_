@@ -186,4 +186,22 @@ describe('CarController', () => {
       })
     })
   })
+
+  describe('update', () => {
+    it('should update an existing car', async () => {
+      const car = new CarBuilder().withId(31).build()
+      carServiceMock.update.mockResolvedValue(car)
+      authenticationGuardMock.user = UserBuilder.from(user).build()
+      await request(app.getHttpServer())
+        .patch(`/cars/${car.id}`)
+        .send({
+          name: car.name,
+          state: car.state,
+          licensePlate: car.licensePlate,
+          info: car.info,
+        })
+        .expect(HttpStatus.OK)
+        .expect({ ...car })
+    })
+  })
 })
