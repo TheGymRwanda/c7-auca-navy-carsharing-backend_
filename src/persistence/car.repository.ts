@@ -48,7 +48,6 @@ function rowToDomain(row: Row): Car {
 @Injectable()
 export class CarRepository implements ICarRepository {
   public async find(_tx: Transaction, id: CarID): Promise<Car | null> {
-    // throw new Error('Not implemented')
     const row = await _tx.oneOrNone<Row>(
       'SELECT * FROM cars WHERE id = $(id)',
       { id },
@@ -57,7 +56,6 @@ export class CarRepository implements ICarRepository {
   }
 
   public async get(_tx: Transaction, id: CarID): Promise<Car> {
-    // throw new Error('Not implemented')
     const car = await this.find(_tx, id)
 
     if (!car) {
@@ -67,7 +65,6 @@ export class CarRepository implements ICarRepository {
   }
 
   public async getAll(_tx: Transaction): Promise<Car[]> {
-    // throw new Error('Not implemented')
     const rows = await _tx.any<Row>('SELECT * FROM cars')
     return rows.map(row => rowToDomain(row))
   }
