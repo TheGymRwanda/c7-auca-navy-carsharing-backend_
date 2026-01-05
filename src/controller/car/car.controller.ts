@@ -94,8 +94,6 @@ export class CarController {
     @CurrentUser() _owner: User,
     @Body() _data: CreateCarDTO,
   ): Promise<CarDTO> {
-    // throw new NotImplementedException()
-    // console.info(_data)
     const car = await this.carService.create(_data)
     return CarDTO.fromModel(car)
   }
