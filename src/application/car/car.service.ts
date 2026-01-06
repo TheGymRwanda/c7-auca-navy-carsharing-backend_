@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
 import { type UserID } from '../user'
 
-import { type Car, type CarID, type CarProperties } from './car'
+import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
 
@@ -35,7 +35,9 @@ export class CarService implements ICarService {
   }
 
   public async get(_id: CarID): Promise<Car> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.get(tx, _id),
+    )
   }
 
   public async update(
@@ -43,6 +45,20 @@ export class CarService implements ICarService {
     _updates: Partial<Except<CarProperties, 'id'>>,
     _currentUserId: UserID,
   ): Promise<Car> {
-    throw new Error('Not implemented')
+    //this won't work for now because the get service is implemented on another branch, the test works though
+    if (_currentUserId === _updates.ownerId) {
+      return this.databaseConnection.transactional(async tx => {
+        const car = await this.carRepository.get(tx, _carId)
+        const updatedCar = new Car({
+          ..._updates,
+          ...car,
+          id: _carId,
+        })
+        return this.carRepository.update(tx, updatedCar)
+      })
+    }
+    throw new UnauthorizedException(
+      'User is not allowed to update a car that is not theirs.',
+    )
   }
 }

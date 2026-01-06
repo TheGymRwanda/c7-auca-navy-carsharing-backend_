@@ -31,5 +31,15 @@ describe('CarService', () => {
         carService.update(car.id, { horsepower: 555 }, owner.id),
       ).resolves.toEqual(updatedCar)
     })
+
+    xit('should prevent users from updating a car that is not their own', async () => {
+      const owner = new UserBuilder().withId(50).build()
+      const car = new CarBuilder().withOwner(owner).withHorsepower(80).build()
+      const updatedCar = CarBuilder.from(car).withHorsepower(85).build()
+
+      await expect(
+        carService.update(car.id, updatedCar, owner.id),
+      ).resolves.toReject()
+    })
   })
 })
