@@ -23,6 +23,8 @@
     "db:start": "docker run --rm --detach --publish=5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=carsharing --name carsharing --mount type=bind,source=\"$(pwd)/fixture\",target=/fixture,readonly postgres:15-alpine",
     "db:migrate-up": "node-pg-migrate --config-file pgmigrate.config.json up",
     "db:load-fixture": "docker exec carsharing /bin/bash -c \"find /fixture -type f | sort | xargs -I {} psql --username=postgres --dbname carsharing -f {}\"",
+    "dev:docker": "docker-compose up --build -d",
+    "dev:docker:down": "docker-compose down -v",
     "db:stop": "docker rm -f carsharing",
     "lint": "npm run lint:tsc && npm run lint:eslint && npm run lint:prettier",
     "lint:eslint": "eslint \"{src,migrations,test}/**/*.ts\"",
