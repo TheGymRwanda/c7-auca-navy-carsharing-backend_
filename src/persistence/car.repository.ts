@@ -10,7 +10,7 @@ import {
   type ICarRepository,
   type UserID,
 } from '../application'
-import { Car } from '../application/car'
+import { Car, CarNotFoundError } from '../application/car'
 
 import { type Transaction } from './database-connection.interface'
 
@@ -47,16 +47,26 @@ function rowToDomain(row: Row): Car {
 
 @Injectable()
 export class CarRepository implements ICarRepository {
-  public async find(_tx: Transaction, _id: CarID): Promise<Car | null> {
-    throw new Error('Not implemented')
+  public async find(_tx: Transaction, id: CarID): Promise<Car | null> {
+    const row = await _tx.oneOrNone<Row>(
+      'SELECT * FROM cars WHERE id = $(id)',
+      { id },
+    )
+    return row ? rowToDomain(row) : null
   }
 
-  public async get(_tx: Transaction, _id: CarID): Promise<Car> {
-    throw new Error('Not implemented')
+  public async get(_tx: Transaction, id: CarID): Promise<Car> {
+    const car = await this.find(_tx, id)
+
+    if (!car) {
+      throw new CarNotFoundError(id)
+    }
+    return car
   }
 
   public async getAll(_tx: Transaction): Promise<Car[]> {
-    throw new Error('Not implemented')
+    const rows = await _tx.any<Row>('SELECT * FROM cars')
+    return rows.map(row => rowToDomain(row))
   }
 
   public async findByLicensePlate(

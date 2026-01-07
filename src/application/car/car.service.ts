@@ -31,11 +31,15 @@ export class CarService implements ICarService {
   }
 
   public async getAll(): Promise<Car[]> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.getAll(tx),
+    )
   }
 
   public async get(_id: CarID): Promise<Car> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.get(tx, _id),
+    )
   }
 
   public async update(
