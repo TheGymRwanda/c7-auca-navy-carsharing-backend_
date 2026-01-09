@@ -74,7 +74,6 @@ export class CarRepository implements ICarRepository {
     _tx: Transaction,
     _car: Except<CarProperties, 'id'>,
   ): Promise<Car> {
-    // throw new Error('Not implemented')
     const row = await _tx.one<Row>(
       `
       INSERT INTO cars(
