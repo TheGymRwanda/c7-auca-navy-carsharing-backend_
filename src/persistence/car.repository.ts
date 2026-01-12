@@ -70,13 +70,13 @@ export class CarRepository implements ICarRepository {
     const row = await _tx.oneOrNone<Row>(
       `
       UPDATE cars SET
-        car_type_id =  $(car_type_id),
+        car_type_id =  $(carTypeId),
         name = $(name),
-        owner_id = $(owner_id),
+        owner_id = $(ownerId),
         state =  $(state),
-        fuel_type = $(fuel_type),
+        fuel_type = $(fuelType),
         horsepower = $(horsepower),
-        license_plate = $(license_plate),
+        license_plate = $(licensePlate),
         info = $(info)
       WHERE id = $(id)
       RETURNING *
