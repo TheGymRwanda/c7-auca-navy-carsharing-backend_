@@ -47,8 +47,8 @@ export class CarService implements ICarService {
     return this.databaseConnection.transactional(async tx => {
       const car = await this.carRepository.get(tx, _carId)
       const updatedCar = new Car({
-        ..._updates,
         ...car,
+        ..._updates,
         id: _carId,
       })
       return this.carRepository.update(tx, updatedCar)
