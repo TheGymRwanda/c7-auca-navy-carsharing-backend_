@@ -45,7 +45,7 @@ export class CarService implements ICarService {
     const licenseExists = cars.find(car => {
       return car.licensePlate === licensePlate
     })
-    return licenseExists ? false : true
+    return licenseExists ? true : false
   }
 
   public async getAll(): Promise<Car[]> {
