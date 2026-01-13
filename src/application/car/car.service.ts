@@ -27,7 +27,9 @@ export class CarService implements ICarService {
   /* eslint-disable @typescript-eslint/require-await */
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.insert(tx, _data),
+    )
   }
 
   public async getAll(): Promise<Car[]> {
