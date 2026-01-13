@@ -43,7 +43,6 @@ export class CarService implements ICarService {
     _updates: Partial<Except<CarProperties, 'id'>>,
     _currentUserId: UserID,
   ): Promise<Car> {
-    //this won't work for now because the get service is implemented on another branch, the test works though
     return this.databaseConnection.transactional(async tx => {
       const car = await this.carRepository.get(tx, _carId)
       const updatedCar = new Car({
