@@ -77,7 +77,28 @@ export class CarRepository implements ICarRepository {
   }
 
   public async update(_tx: Transaction, _car: Car): Promise<Car> {
-    throw new Error('Not implemented')
+    const row = await _tx.oneOrNone<Row>(
+      `
+      UPDATE cars SET
+        car_type_id =  $(carTypeId),
+        name = $(name),
+        owner_id = $(ownerId),
+        state =  $(state),
+        fuel_type = $(fuelType),
+        horsepower = $(horsepower),
+        license_plate = $(licensePlate),
+        info = $(info)
+      WHERE id = $(id)
+      RETURNING *
+      `,
+      { ..._car },
+    )
+
+    if (!row) {
+      throw new CarNotFoundError(_car.id)
+    }
+
+    return rowToDomain(row)
   }
 
   public async insert(
