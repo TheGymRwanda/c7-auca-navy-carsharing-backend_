@@ -42,6 +42,19 @@ You know have all the tables you need, but they don't contain any data. More spe
 npm run db:load-fixture
 ```
 
+### Setting up the database with docker compose
+You can also set the database up with docker compose, utilizing one command to essentially start the db, run the migration, and load the data.
+To start up the db with compose run.
+
+```bash
+npm run dev:docker
+```
+
+To stop the running container after setting up with docker compose run
+```bash
+npm run dev:docker:down
+```
+
 You are now good to go!
 
 # Starting the server
