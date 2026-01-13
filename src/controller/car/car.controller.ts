@@ -54,7 +54,8 @@ export class CarController {
   })
   @Get()
   public async getAll(): Promise<CarDTO[]> {
-    throw new NotImplementedException()
+    const cars = await this.carService.getAll()
+    return cars.map(car => CarDTO.fromModel(car))
   }
   @ApiOperation({
     summary: 'Retrieve a specific car.',
@@ -93,7 +94,8 @@ export class CarController {
     @CurrentUser() _owner: User,
     @Body() _data: CreateCarDTO,
   ): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const car = await this.carService.create(_data)
+    return CarDTO.fromModel(car)
   }
   @ApiOperation({
     summary: 'Update an existing car.',

@@ -27,11 +27,15 @@ export class CarService implements ICarService {
   /* eslint-disable @typescript-eslint/require-await */
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.insert(tx, _data),
+    )
   }
 
   public async getAll(): Promise<Car[]> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.getAll(tx),
+    )
   }
 
   public async get(_id: CarID): Promise<Car> {
@@ -59,5 +63,14 @@ export class CarService implements ICarService {
     throw new UnauthorizedException(
       'User is not allowed to update a car that is not theirs.',
     )
+    return this.databaseConnection.transactional(async tx => {
+      const car = await this.carRepository.get(tx, _carId)
+      const updatedCar = new Car({
+        ...car,
+        ..._updates,
+        id: _carId,
+      })
+      return this.carRepository.update(tx, updatedCar)
+    })
   }
 }
