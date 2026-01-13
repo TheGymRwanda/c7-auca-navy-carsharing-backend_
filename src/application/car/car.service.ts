@@ -46,9 +46,6 @@ export class CarService implements ICarService {
       return car.licensePlate === licensePlate
     })
     return licenseExists ? true : false
-    return this.databaseConnection.transactional(tx =>
-      this.carRepository.insert(tx, _data),
-    )
   }
 
   public async getAll(): Promise<Car[]> {
@@ -72,29 +69,20 @@ export class CarService implements ICarService {
     if (licenseExists) {
       throw new DuplicateLicensePlateError(_updates.licensePlate ?? '')
     }
-    throw new Error('Not implemented')
-    if (_currentUserId === _updates.ownerId) {
+    const car = await this.get(_carId)
+    const updatedCar = new Car({
+      ...car,
+      ..._updates,
+      id: _carId,
+    })
+    console.info(_currentUserId, _updates.ownerId, _updates)
+    if (_currentUserId === updatedCar.ownerId) {
       return this.databaseConnection.transactional(async tx => {
-        const car = await this.carRepository.get(tx, _carId)
-        const updatedCar = new Car({
-          ..._updates,
-          ...car,
-          id: _carId,
-        })
         return this.carRepository.update(tx, updatedCar)
       })
     }
     throw new UnauthorizedException(
       'User is not allowed to update a car that is not theirs.',
     )
-    return this.databaseConnection.transactional(async tx => {
-      const car = await this.carRepository.get(tx, _carId)
-      const updatedCar = new Car({
-        ...car,
-        ..._updates,
-        id: _carId,
-      })
-      return this.carRepository.update(tx, updatedCar)
-    })
   }
 }
