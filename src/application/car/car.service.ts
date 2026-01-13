@@ -63,7 +63,7 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     const licenseExists = await this.checkLicenseExists(_updates)
     if (licenseExists) {
-      throw new DuplicateLicensePlateError(_updates.licensePlate || '')
+      throw new DuplicateLicensePlateError(_updates.licensePlate ?? '')
     }
     throw new Error('Not implemented')
   }
