@@ -7,6 +7,7 @@ import { type UserID } from '../user'
 import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
+import { DuplicateLicensePlateError } from './error'
 
 @Injectable()
 export class CarService implements ICarService {
@@ -27,6 +28,24 @@ export class CarService implements ICarService {
   /* eslint-disable @typescript-eslint/require-await */
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
+    const licenseExists = await this.checkLicenseExists(_data)
+    if (licenseExists) {
+      throw new DuplicateLicensePlateError(_data.licensePlate || '')
+    }
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.insert(tx, _data),
+    )
+  }
+
+  public async checkLicenseExists(
+    _data: Except<CarProperties, 'id'> | Partial<Except<CarProperties, 'id'>>,
+  ): Promise<boolean> {
+    const licensePlate = _data.licensePlate
+    const cars = await this.getAll()
+    const licenseExists = cars.find(car => {
+      return car.licensePlate === licensePlate
+    })
+    return licenseExists ? true : false
     return this.databaseConnection.transactional(tx =>
       this.carRepository.insert(tx, _data),
     )
@@ -49,6 +68,11 @@ export class CarService implements ICarService {
     _updates: Partial<Except<CarProperties, 'id'>>,
     _currentUserId: UserID,
   ): Promise<Car> {
+    const licenseExists = await this.checkLicenseExists(_updates)
+    if (licenseExists) {
+      throw new DuplicateLicensePlateError(_updates.licensePlate ?? '')
+    }
+    throw new Error('Not implemented')
     if (_currentUserId === _updates.ownerId) {
       return this.databaseConnection.transactional(async tx => {
         const car = await this.carRepository.get(tx, _carId)
