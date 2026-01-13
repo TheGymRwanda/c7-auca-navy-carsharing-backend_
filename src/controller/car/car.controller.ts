@@ -27,7 +27,6 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { CarDTO, CreateCarDTO, PatchCarDTO } from './car.dto'
-
 @ApiTags(Car.name)
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
@@ -41,22 +40,23 @@ import { CarDTO, CreateCarDTO, PatchCarDTO } from './car.dto'
 @Controller('/cars')
 export class CarController {
   private readonly carService: ICarService
-
   public constructor(carService: ICarService) {
     this.carService = carService
   }
-
   // Please remove the next line when implementing this file.
   /* eslint-disable @typescript-eslint/require-await */
-
   @ApiOperation({
     summary: 'Retrieve all cars.',
   })
+  @ApiOkResponse({
+    description: 'The request was successful.',
+    type: [CarDTO],
+  })
   @Get()
   public async getAll(): Promise<CarDTO[]> {
-    throw new NotImplementedException()
+    const cars = await this.carService.getAll()
+    return cars.map(car => CarDTO.fromModel(car))
   }
-
   @ApiOperation({
     summary: 'Retrieve a specific car.',
   })
@@ -73,9 +73,9 @@ export class CarController {
   })
   @Get(':id')
   public async get(@Param('id', ParseIntPipe) _id: CarID): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const car = await this.carService.get(_id)
+    return CarDTO.fromModel(car)
   }
-
   @ApiOperation({
     summary: 'Create a new car.',
   })
@@ -94,9 +94,9 @@ export class CarController {
     @CurrentUser() _owner: User,
     @Body() _data: CreateCarDTO,
   ): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const car = await this.carService.create(_data)
+    return CarDTO.fromModel(car)
   }
-
   @ApiOperation({
     summary: 'Update an existing car.',
   })
@@ -116,6 +116,6 @@ export class CarController {
     @Param('id', ParseIntPipe) _carId: CarID,
     @Body() _data: PatchCarDTO,
   ): Promise<CarDTO> {
-    throw new NotImplementedException()
+    return this.carService.update(_carId, _data, _user.id)
   }
 }

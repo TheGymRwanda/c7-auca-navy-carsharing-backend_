@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
 import { type UserID } from '../user'
 
-import { type Car, type CarID, type CarProperties } from './car'
+import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
 import { DuplicateLicensePlateError } from './error'
@@ -46,14 +46,21 @@ export class CarService implements ICarService {
       return car.licensePlate === licensePlate
     })
     return licenseExists ? true : false
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.insert(tx, _data),
+    )
   }
 
   public async getAll(): Promise<Car[]> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.getAll(tx),
+    )
   }
 
   public async get(_id: CarID): Promise<Car> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.get(tx, _id),
+    )
   }
 
   public async update(
@@ -66,5 +73,28 @@ export class CarService implements ICarService {
       throw new DuplicateLicensePlateError(_updates.licensePlate ?? '')
     }
     throw new Error('Not implemented')
+    if (_currentUserId === _updates.ownerId) {
+      return this.databaseConnection.transactional(async tx => {
+        const car = await this.carRepository.get(tx, _carId)
+        const updatedCar = new Car({
+          ..._updates,
+          ...car,
+          id: _carId,
+        })
+        return this.carRepository.update(tx, updatedCar)
+      })
+    }
+    throw new UnauthorizedException(
+      'User is not allowed to update a car that is not theirs.',
+    )
+    return this.databaseConnection.transactional(async tx => {
+      const car = await this.carRepository.get(tx, _carId)
+      const updatedCar = new Car({
+        ...car,
+        ..._updates,
+        id: _carId,
+      })
+      return this.carRepository.update(tx, updatedCar)
+    })
   }
 }
