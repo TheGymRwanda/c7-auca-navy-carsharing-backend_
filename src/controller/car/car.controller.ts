@@ -164,7 +164,10 @@ export class CarController {
           error.message,
         )
       }
-      throw error
+
+      throw new UnauthorizedException(
+        'User is not allowed to update a car that is not theirs.',
+      )
     }
   }
 }
