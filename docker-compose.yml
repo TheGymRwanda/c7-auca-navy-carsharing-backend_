@@ -1,46 +1,54 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: carsharing
+    container_name: carsharing_db
     restart: always
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: carsharing
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=carsharing
     volumes:
-      - ./fixture:/fixture:ro
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d carsharing"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   db-init:
-    build: .
-    image: carsharing-init 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: carsharing_init_image:latest
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/carsharing
-      PGHOST: db
-      PGUSER: postgres
-      PGPASSWORD: postgres
-      PGDATABASE: carsharing
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/carsharing
+      - PGHOST=db
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=carsharing
     volumes:
       - ./fixture:/fixture:ro
-    command: >
+      - ./migration:/migration:ro
+    command: |
       bash -c "
       set -e
+      echo 'Waiting for DB...'
+      until pg_isready -h $$PGHOST -U $$PGUSER -d $$PGDATABASE; do 
+        sleep 1
+      done
+      
       echo 'Applying migrations...'
       npm run db:migrate-up
+      
       echo 'Loading fixtures...'
-      find /fixture -type f -name '*.sql' | sort | xargs -I {} psql -f {}
+      find /fixture -type f -name '*.sql' | sort | xargs -I {} psql $$DATABASE_URL -f {}
+      
       echo 'Database initialization complete.'
       "
-
 volumes:
   pgdata:
