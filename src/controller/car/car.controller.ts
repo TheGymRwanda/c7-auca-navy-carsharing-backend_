@@ -25,7 +25,13 @@ import {
 
 import { DuplicateLicensePlateError } from 'src/application/car/error'
 
-import { Car, type CarID, ICarService, type User } from '../../application'
+import {
+  Car,
+  type CarID,
+  CarState,
+  ICarService,
+  type User,
+} from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
@@ -107,7 +113,11 @@ export class CarController {
     @Body() _data: CreateCarDTO,
   ): Promise<CarDTO> {
     try {
-      const car = await this.carService.create({ ..._data, ownerId: _owner.id })
+      const car = await this.carService.create({
+        ..._data,
+        ownerId: _owner.id,
+        state: CarState.LOCKED,
+      })
       return CarDTO.fromModel(car)
     } catch (error) {
       if (error instanceof DuplicateLicensePlateError) {

@@ -144,7 +144,6 @@ export class CreateCarDTO extends PickType(CarDTO, [
   'name',
   'fuelType',
   'horsepower',
-  'state',
   'licensePlate',
   'info',
 ] as const) {}
