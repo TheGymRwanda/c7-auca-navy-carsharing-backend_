@@ -25,7 +25,13 @@ import {
 
 import { DuplicateLicensePlateError } from 'src/application/car/error'
 
-import { Car, type CarID, ICarService, type User } from '../../application'
+import {
+  Car,
+  type CarID,
+  ICarService,
+  type User,
+  UserID,
+} from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
@@ -103,16 +109,17 @@ export class CarController {
   })
   @Post()
   public async create(
-    @CurrentUser() _owner: User,
+    @CurrentUser() _owner: UserID,
     @Body() _data: CreateCarDTO,
-  ): Promise<CarDTO | undefined> {
+  ): Promise<CarDTO> {
     try {
-      const car = await this.carService.create(_data)
+      const car = await this.carService.create({ ..._data, ownerId: _owner })
       return CarDTO.fromModel(car)
     } catch (error) {
       if (error instanceof DuplicateLicensePlateError) {
         throw new BadRequestException(error.message)
       }
+      throw error
     }
   }
 
@@ -137,7 +144,7 @@ export class CarController {
     @CurrentUser() _user: User,
     @Param('id', ParseIntPipe) _carId: CarID,
     @Body() _data: PatchCarDTO,
-  ): Promise<CarDTO | undefined> {
+  ): Promise<CarDTO> {
     try {
       return await this.carService.update(_carId, _data, _user.id)
     } catch (error) {
@@ -153,6 +160,7 @@ export class CarController {
           error.message,
         )
       }
+      throw error
     }
   }
 }

@@ -8,6 +8,7 @@ import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
 import { DuplicateLicensePlateError } from './error'
+import checkLicenseExists from './utils/check-license-exists'
 
 @Injectable()
 export class CarService implements ICarService {
@@ -28,24 +29,13 @@ export class CarService implements ICarService {
   /* eslint-disable @typescript-eslint/require-await */
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
-    const licenseExists = await this.checkLicenseExists(_data)
-    if (licenseExists) {
-      throw new DuplicateLicensePlateError(_data.licensePlate || '')
+    const licenseExists = await checkLicenseExists(_data, this)
+    if (licenseExists && _data.licensePlate !== null) {
+      throw new DuplicateLicensePlateError(_data.licensePlate)
     }
     return this.databaseConnection.transactional(tx =>
       this.carRepository.insert(tx, _data),
     )
-  }
-
-  public async checkLicenseExists(
-    _data: Except<CarProperties, 'id'> | Partial<Except<CarProperties, 'id'>>,
-  ): Promise<boolean> {
-    const licensePlate = _data.licensePlate
-    const cars = await this.getAll()
-    const licenseExists = cars.find(car => {
-      return car.licensePlate === licensePlate
-    })
-    return licenseExists ? true : false
   }
 
   public async getAll(): Promise<Car[]> {
@@ -65,9 +55,9 @@ export class CarService implements ICarService {
     _updates: Partial<Except<CarProperties, 'id'>>,
     _currentUserId: UserID,
   ): Promise<Car> {
-    const licenseExists = await this.checkLicenseExists(_updates)
-    if (licenseExists) {
-      throw new DuplicateLicensePlateError(_updates.licensePlate ?? '')
+    const licenseExists = await checkLicenseExists(_updates, this)
+    if (licenseExists && _updates.licensePlate) {
+      throw new DuplicateLicensePlateError(_updates.licensePlate)
     }
     const car = await this.get(_carId)
     const updatedCar = new Car({
@@ -75,7 +65,6 @@ export class CarService implements ICarService {
       ..._updates,
       id: _carId,
     })
-    console.info(_currentUserId, _updates.ownerId, _updates)
     if (_currentUserId === updatedCar.ownerId) {
       return this.databaseConnection.transactional(async tx => {
         return this.carRepository.update(tx, updatedCar)
