@@ -105,14 +105,15 @@ export class CarController {
   public async create(
     @CurrentUser() _owner: User,
     @Body() _data: CreateCarDTO,
-  ): Promise<CarDTO | undefined> {
+  ): Promise<CarDTO> {
     try {
-      const car = await this.carService.create(_data)
+      const car = await this.carService.create({ ..._data, ownerId: _owner.id })
       return CarDTO.fromModel(car)
     } catch (error) {
       if (error instanceof DuplicateLicensePlateError) {
         throw new BadRequestException(error.message)
       }
+      throw error
     }
   }
 
@@ -137,7 +138,7 @@ export class CarController {
     @CurrentUser() _user: User,
     @Param('id', ParseIntPipe) _carId: CarID,
     @Body() _data: PatchCarDTO,
-  ): Promise<CarDTO | undefined> {
+  ): Promise<CarDTO> {
     try {
       return await this.carService.update(_carId, _data, _user.id)
     } catch (error) {
@@ -153,6 +154,7 @@ export class CarController {
           error.message,
         )
       }
+      throw error
     }
   }
 }
