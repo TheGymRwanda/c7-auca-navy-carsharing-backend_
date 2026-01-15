@@ -57,7 +57,10 @@ export class CarRepository implements ICarRepository {
 
   public async get(_tx: Transaction, id: CarID): Promise<Car> {
     const car = await this.find(_tx, id)
+    return this.checkCarExists(car, id)
+  }
 
+  public checkCarExists(car: Car | null, id: CarID) {
     if (!car) {
       throw new CarNotFoundError(id)
     }
@@ -73,7 +76,11 @@ export class CarRepository implements ICarRepository {
     _tx: Transaction,
     _licensePlate: string,
   ): Promise<Car | null> {
-    throw new Error('Not implemented')
+    const cars = await this.getAll(_tx)
+    const car = cars.find(car => {
+      return car.licensePlate === _licensePlate
+    })
+    return car ?? null
   }
 
   public async update(_tx: Transaction, _car: Car): Promise<Car> {

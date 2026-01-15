@@ -74,7 +74,7 @@ export class CarTypeService implements ICarTypeService {
 
     return result
   }
- 
+
   public async get(id: CarTypeID): Promise<CarType> {
     // This code does essentially the same thing as the code above (except that it returns one car type instead of many),
     // but it is written much more concisely.
