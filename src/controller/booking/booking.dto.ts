@@ -1,10 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsInt, IsPositive, IsEnum } from 'class-validator'
-import { CarID, CarState, UserID } from 'src/application'
+import { Writable } from 'type-fest'
 
+import {
+  CarID,
+  CarState,
+  UserID,
+  Booking,
+  ITimeProvider,
+} from 'src/application'
 import { type BookingID } from 'src/application/booking/booking'
 import { validate } from 'src/util'
-import { Writable } from 'type-fest'
 
 export class BookingDTO {
   @ApiProperty({
@@ -50,21 +56,21 @@ export class BookingDTO {
     description: 'The start date of the booking',
     example: '2023-08-08T14:07:27.828Z',
   })
-  public readonly startDate!: Date
+  public readonly startDate!: ITimeProvider
 
   @ApiProperty({
     description: 'The start date of the booking',
     example: '2023-08-08T14:07:27.828Z',
   })
-  public readonly endDate!: Date
+  public readonly endDate!: ITimeProvider
 
   public static create(data: {
     id: BookingID
     carId: CarID
     state: CarState
     renterId: UserID
-    startDate: Date
-    endDate: Date
+    startDate: ITimeProvider
+    endDate: ITimeProvider
   }): BookingDTO {
     const instance = new BookingDTO() as Writable<BookingDTO>
     instance.id = data.id
@@ -76,7 +82,7 @@ export class BookingDTO {
     return validate(instance)
   }
 
-  public static fromModel(booking: Booking){
+  public static fromModel(booking: Booking) {
     return BookingDTO.create(booking)
   }
 }

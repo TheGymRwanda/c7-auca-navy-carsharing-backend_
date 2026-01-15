@@ -4,6 +4,7 @@ import { Opaque } from 'type-fest'
 import { validate } from 'src/util'
 
 import { CarID, CarState } from '../car'
+import { ITimeProvider } from '../time-provider.interface'
 import { UserID } from '../user'
 
 export type BookingID = Opaque<'number', 'booking-id'>
@@ -13,8 +14,8 @@ export type BookingProperties = {
   carId: CarID
   state: CarState
   renterId: UserID
-  startDate: Date
-  endDate: Date
+  startDate: ITimeProvider
+  endDate: ITimeProvider
 }
 
 export class Booking {
@@ -31,18 +32,18 @@ export class Booking {
   public readonly renterId: UserID
 
   @IsEnum(CarState)
-  public readonly carState: CarState
+  public readonly state: CarState
 
   @IsDate()
-  public readonly startDate: Date
+  public readonly startDate: ITimeProvider
 
   @IsDate()
-  public readonly endDate: Date
+  public readonly endDate: ITimeProvider
 
   public constructor(data: BookingProperties) {
     this.id = data.id
     this.carId = data.carId
-    this.carState = data.state
+    this.state = data.state
     this.renterId = data.renterId
     this.startDate = data.startDate
     this.endDate = data.endDate
