@@ -5,6 +5,7 @@ import {
   IDatabaseConnection,
   Transaction,
 } from '../../persistence/database-connection.interface'
+import { CarTypeNotFoundError, ICarTypeService } from '../car-type'
 import { type UserID } from '../user'
 
 import { Car, type CarID, type CarProperties } from './car'
@@ -16,14 +17,17 @@ import { DuplicateLicensePlateError } from './error'
 export class CarService implements ICarService {
   private readonly carRepository: ICarRepository
   private readonly databaseConnection: IDatabaseConnection
+  private readonly carTypeService: ICarTypeService
   private readonly logger: Logger
 
   public constructor(
+    carTypeService: ICarTypeService,
     carRepository: ICarRepository,
     databaseConnection: IDatabaseConnection,
   ) {
     this.carRepository = carRepository
     this.databaseConnection = databaseConnection
+    this.carTypeService = carTypeService
     this.logger = new Logger(CarService.name)
   }
 
@@ -31,10 +35,21 @@ export class CarService implements ICarService {
   /* eslint-disable @typescript-eslint/require-await */
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
+    await this.validateCarTypeId(_data)
     return this.databaseConnection.transactional(async tx => {
       await this.checkLicenseExists(tx, _data)
       return this.carRepository.insert(tx, _data)
     })
+  }
+
+  public async validateCarTypeId(_data: Except<CarProperties, 'id'>) {
+    const carTypeIds = await this.carTypeService.getAll()
+    const carTypeIdExists = carTypeIds.find(
+      carType => carType.id === _data.carTypeId,
+    )
+    if (!carTypeIdExists) {
+      throw new CarTypeNotFoundError(_data.carTypeId)
+    }
   }
 
   public async getAll(): Promise<Car[]> {

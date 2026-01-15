@@ -29,6 +29,7 @@ import {
   Car,
   type CarID,
   CarState,
+  CarTypeNotFoundError,
   ICarService,
   type User,
 } from '../../application'
@@ -120,6 +121,9 @@ export class CarController {
       })
       return CarDTO.fromModel(car)
     } catch (error) {
+      if (error instanceof CarTypeNotFoundError) {
+        throw new CarTypeNotFoundError(_data.carTypeId)
+      }
       if (error instanceof DuplicateLicensePlateError) {
         throw new BadRequestException(error.message)
       }
