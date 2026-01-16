@@ -1,17 +1,33 @@
+import { Injectable } from '@nestjs/common'
 import { Except } from 'type-fest'
+
+import { IDatabaseConnection } from 'src/persistence/database-connection.interface'
 
 import { UserID } from '../user'
 
 import { Booking, BookingID, BookingProperties } from './booking'
+import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
 
-export class BookingService extends IBookingService {
+@Injectable()
+export class BookingService implements IBookingService {
+  private readonly databaseConnection: IDatabaseConnection
+  private readonly bookingRepository: IBookingRepository
+  public constructor(
+    databaseConnection: IDatabaseConnection,
+    bookingRepository: IBookingRepository,
+  ) {
+    this.databaseConnection = databaseConnection
+    this.bookingRepository = bookingRepository
+  }
   public get(): Promise<Booking> {
     throw new Error('Not implemented')
   }
 
-  public getAll(): Promise<Booking[]> {
-    throw new Error('Not implemented')
+  public async getAll(): Promise<Booking[]> {
+    return this.databaseConnection.transactional(tx =>
+      this.bookingRepository.getAll(tx),
+    )
   }
 
   public create(_data: Except<BookingProperties, 'id'>): Promise<Booking> {

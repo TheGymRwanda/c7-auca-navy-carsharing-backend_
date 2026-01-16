@@ -9,6 +9,8 @@ import {
   ICarTypeService,
   IUserService,
   UserService,
+  BookingService,
+  IBookingService,
 } from '../application'
 
 import { DatabaseModule } from './database.module'
@@ -33,7 +35,17 @@ import { RepositoryModule } from './repository.module'
       provide: IUserService,
       useClass: UserService,
     },
+    {
+      provide: IBookingService,
+      useClass: BookingService,
+    },
   ],
-  exports: [IAuthenticationService, ICarService, ICarTypeService, IUserService],
+  exports: [
+    IAuthenticationService,
+    ICarService,
+    ICarTypeService,
+    IUserService,
+    IBookingService,
+  ],
 })
 export class ServiceModule {}

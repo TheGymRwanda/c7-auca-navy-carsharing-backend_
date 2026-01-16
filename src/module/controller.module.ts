@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 
+import { BookingController } from 'src/controller/booking'
+
 import { AuthenticationConfig } from '../application'
 import {
   AuthenticationController,
@@ -11,6 +13,7 @@ import {
 
 import { ConfigModule } from './config.module'
 import { ServiceModule } from './service.module'
+
 
 @Module({
   imports: [
@@ -33,6 +36,7 @@ import { ServiceModule } from './service.module'
     CarController,
     CarTypeController,
     UserController,
+    BookingController,
   ],
 })
 export class ControllerModule {}

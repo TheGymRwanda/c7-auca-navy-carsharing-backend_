@@ -12,7 +12,7 @@ import {
 } from 'src/application'
 import { IBookingRepository } from 'src/application/booking/booking.repository.interface'
 
-import { Transaction } from './database-connection.interface'
+import { type Transaction } from './database-connection.interface'
 
 type Row = {
   id: BookingID
@@ -40,8 +40,10 @@ export class BookingRepository extends IBookingRepository {
     throw new Error('Not implemented')
   }
 
-  public getAll(_tx: Transaction): Promise<Booking[]> {
-    throw new Error('Not implemented')
+  public async getAll(tx: Transaction): Promise<Booking[]> {
+    // throw new Error('Not implemented')
+    const rows = await tx.any<Row>('SELECT * FROM bookings')
+    return rows.map(row => rowToDomain(row))
   }
 
   public update(_tx: Transaction, booking: Booking): Promise<Booking> {
