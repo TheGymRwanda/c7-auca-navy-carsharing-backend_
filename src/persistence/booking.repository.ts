@@ -9,6 +9,7 @@ import {
   CarState,
   UserID,
   ITimeProvider,
+  BookingNotFoundError,
 } from 'src/application'
 import { IBookingRepository } from 'src/application/booking/booking.repository.interface'
 
@@ -36,8 +37,15 @@ function rowToDomain(row: Row) {
 
 @Injectable()
 export class BookingRepository extends IBookingRepository {
-  public get(_tx: Transaction, id: BookingID): Promise<Booking> {
-    throw new Error('Not implemented')
+  public async get(_tx: Transaction, id: BookingID): Promise<Booking> {
+    const row = await _tx.oneOrNone<Row>(
+      'SELECT * FROM bookings WHERE id = ${id}',
+      { id },
+    )
+    if (!row) {
+      throw new BookingNotFoundError(id)
+    }
+    return rowToDomain(row)
   }
 
   public async getAll(tx: Transaction): Promise<Booking[]> {

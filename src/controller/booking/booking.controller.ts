@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common'
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common'
 import {
   ApiBearerAuth,
   ApiUnauthorizedResponse,
@@ -10,6 +10,7 @@ import { IBookingService } from 'src/application/booking/booking.service.interfa
 import { AuthenticationGuard } from '../authentication.guard'
 
 import { BookingDTO } from './booking.dto'
+import { BookingID } from 'src/application'
 
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
@@ -30,5 +31,12 @@ export class BookingController {
   @Get()
   public async getAll(): Promise<BookingDTO[]> {
     return await this.bookingService.getAll()
+  }
+
+  @Get(':id')
+  public async get(
+    @Param('id', ParseIntPipe) id: BookingID,
+  ): Promise<BookingDTO> {
+    return await this.bookingService.get(id)
   }
 }

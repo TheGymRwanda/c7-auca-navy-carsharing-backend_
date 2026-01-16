@@ -20,8 +20,10 @@ export class BookingService implements IBookingService {
     this.databaseConnection = databaseConnection
     this.bookingRepository = bookingRepository
   }
-  public get(): Promise<Booking> {
-    throw new Error('Not implemented')
+  public async get(id: BookingID): Promise<Booking> {
+    return this.databaseConnection.transactional(tx =>
+      this.bookingRepository.get(tx, id),
+    )
   }
 
   public async getAll(): Promise<Booking[]> {

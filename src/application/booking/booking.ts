@@ -7,7 +7,7 @@ import { CarID, CarState } from '../car'
 import { ITimeProvider } from '../time-provider.interface'
 import { UserID } from '../user'
 
-export type BookingID = Opaque<'number', 'booking-id'>
+export type BookingID = Opaque<number, 'booking-id'>
 
 export type BookingProperties = {
   id: BookingID
