@@ -1,17 +1,17 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import {
   IDatabaseConnection,
   Transaction,
 } from '../../persistence/database-connection.interface'
-import { CarTypeNotFoundError, ICarTypeService } from '../car-type'
+import { AccessDeniedError } from '../access-denied.error'
+import { ICarTypeService } from '../car-type'
 import { type UserID } from '../user'
 
 import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
-import { DuplicateLicensePlateError } from './error'
 
 @Injectable()
 export class CarService implements ICarService {
@@ -35,21 +35,11 @@ export class CarService implements ICarService {
   /* eslint-disable @typescript-eslint/require-await */
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
-    await this.validateCarTypeId(_data)
+    await this.carTypeService.get(_data.carTypeId)
     return this.databaseConnection.transactional(async tx => {
-      await this.checkLicenseExists(tx, _data)
+      await this.checkLicenseExists(tx, _data.licensePlate)
       return this.carRepository.insert(tx, _data)
     })
-  }
-
-  public async validateCarTypeId(_data: Except<CarProperties, 'id'>) {
-    const carTypeIds = await this.carTypeService.getAll()
-    const carTypeIdExists = carTypeIds.find(
-      carType => carType.id === _data.carTypeId,
-    )
-    if (!carTypeIdExists) {
-      throw new CarTypeNotFoundError(_data.carTypeId)
-    }
   }
 
   public async getAll(): Promise<Car[]> {
@@ -66,16 +56,14 @@ export class CarService implements ICarService {
 
   public async checkLicenseExists(
     _tx: Transaction,
-    _data: Car | Except<CarProperties, 'id'>,
+    licensePlate: string | null,
   ) {
-    if (_data.licensePlate) {
+    if (licensePlate) {
       const licenseExists = await this.carRepository.findByLicensePlate(
         _tx,
-        _data.licensePlate,
+        licensePlate,
       )
-      if (licenseExists) {
-        throw new DuplicateLicensePlateError(_data.licensePlate)
-      }
+      return licenseExists
     }
   }
 
@@ -86,14 +74,14 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       const car = await this.get(_carId)
-      await this.checkLicenseExists(tx, car)
+      await this.checkLicenseExists(tx, car.licensePlate)
       const updatedCar = new Car({
         ...car,
         ..._updates,
         id: _carId,
       })
       if (_currentUserId !== updatedCar.ownerId) {
-        throw new UnauthorizedException()
+        throw new AccessDeniedError(car.name, car.id)
       }
       return this.carRepository.update(tx, updatedCar)
     })
