@@ -26,6 +26,7 @@ import {
 import { DuplicateLicensePlateError } from 'src/application/car/error'
 
 import {
+  AccessDeniedError,
   Car,
   type CarID,
   CarState,
@@ -162,15 +163,15 @@ export class CarController {
           error.message,
         )
       }
-      if (error instanceof UnauthorizedException) {
+      if (error instanceof AccessDeniedError) {
         throw new UnauthorizedException(
-          'This user is not allowed to perform the following operation.',
+          'User is not allowed to update a car that is not theirs.',
           error.message,
         )
       }
 
       throw new UnauthorizedException(
-        'User is not allowed to update a car that is not theirs.',
+        'This user is not allowed to perform the following operation.',
       )
     }
   }
