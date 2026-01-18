@@ -5,12 +5,12 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger'
 
+import { BookingID } from 'src/application'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
 
 import { AuthenticationGuard } from '../authentication.guard'
 
 import { BookingDTO } from './booking.dto'
-import { BookingID } from 'src/application'
 
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
