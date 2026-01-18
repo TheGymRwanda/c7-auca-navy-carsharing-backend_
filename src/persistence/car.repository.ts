@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
+import { DuplicateLicensePlateError } from 'src/application/car/error'
+
 import {
   type CarID,
   type CarProperties,
@@ -57,10 +59,6 @@ export class CarRepository implements ICarRepository {
 
   public async get(_tx: Transaction, id: CarID): Promise<Car> {
     const car = await this.find(_tx, id)
-    return this.checkCarExists(car, id)
-  }
-
-  public checkCarExists(car: Car | null, id: CarID) {
     if (!car) {
       throw new CarNotFoundError(id)
     }
@@ -74,13 +72,16 @@ export class CarRepository implements ICarRepository {
 
   public async findByLicensePlate(
     _tx: Transaction,
-    _licensePlate: string,
+    licensePlate: string,
   ): Promise<Car | null> {
-    const cars = await this.getAll(_tx)
-    const car = cars.find(car => {
-      return car.licensePlate === _licensePlate
-    })
-    return car ?? null
+    const row = await _tx.oneOrNone<Row>(
+      'SELECT * FROM cars WHERE license_plate = $(licensePlate)',
+      { licensePlate },
+    )
+    if (row) {
+      throw new DuplicateLicensePlateError(licensePlate)
+    }
+    return row ? rowToDomain(row) : null
   }
 
   public async update(_tx: Transaction, _car: Car): Promise<Car> {
