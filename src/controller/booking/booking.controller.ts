@@ -3,15 +3,21 @@ import {
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger'
 
-import { BookingID } from 'src/application'
+import { Booking, BookingID } from 'src/application'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
 
 import { AuthenticationGuard } from '../authentication.guard'
 
 import { BookingDTO } from './booking.dto'
 
+@ApiTags(Booking.name)
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
   description:
@@ -28,11 +34,32 @@ export class BookingController {
     this.bookingService = bookingService
   }
 
+  @ApiOperation({
+    summary: 'Retrieve all bookings',
+  })
+  @ApiOkResponse({
+    description: 'The bookings was retrieved successfully',
+    type: [BookingDTO],
+  })
   @Get()
   public async getAll(): Promise<BookingDTO[]> {
     return await this.bookingService.getAll()
   }
 
+  @ApiOperation({
+    summary: 'Retrieve a specific booking by id',
+  })
+  @ApiOkResponse({
+    description: 'The booking was successfully retrieved.',
+    type: BookingDTO,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The request was malformed, e.g. invalid params or property in request body',
+  })
+  @ApiNotFoundResponse({
+    description: 'No booking with the given id was found',
+  })
   @Get(':id')
   public async get(
     @Param('id', ParseIntPipe) id: BookingID,
