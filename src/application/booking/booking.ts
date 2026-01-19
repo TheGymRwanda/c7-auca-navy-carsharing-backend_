@@ -3,17 +3,19 @@ import { Opaque } from 'type-fest'
 
 import { validate } from 'src/util'
 
-import { CarID, CarState } from '../car'
+import { CarID } from '../car'
 import { UserID } from '../user'
+
+import { BookingState } from './booking-state'
 
 export type BookingID = Opaque<number, 'booking-id'>
 
 export type BookingProperties = {
   id: BookingID
   carId: CarID
-  state: CarState
+  state: BookingState
   renterId: UserID
-  startDate: string,
+  startDate: string
   endDate: string
 }
 
@@ -30,8 +32,8 @@ export class Booking {
   @IsPositive()
   public readonly renterId: UserID
 
-  @IsEnum(CarState)
-  public readonly state: CarState
+  @IsEnum(BookingState)
+  public readonly state: BookingState
 
   @IsDate()
   public readonly startDate: string

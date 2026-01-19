@@ -1,16 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, PickType } from '@nestjs/swagger'
 import { IsInt, IsPositive, IsEnum } from 'class-validator'
 import { Writable } from 'type-fest'
 
-import {
-  CarID,
-  CarState,
-  UserID,
-  Booking,
-  ITimeProvider,
-} from 'src/application'
+import { CarID, UserID, Booking } from 'src/application'
 import { type BookingID } from 'src/application/booking/booking'
-import { validate } from 'src/util'
+import { BookingState } from 'src/application/booking/booking-state'
+import { StrictPartialType, validate } from 'src/util'
 
 export class BookingDTO {
   @ApiProperty({
@@ -37,11 +32,11 @@ export class BookingDTO {
 
   @ApiProperty({
     description: 'The current state of the car.',
-    enum: CarState,
-    example: CarState.LOCKED,
+    enum: BookingState,
+    example: BookingState.PENDING,
   })
-  @IsEnum(CarState)
-  public readonly state!: CarState
+  @IsEnum(BookingState)
+  public readonly state!: BookingState
 
   @ApiProperty({
     description: 'The id of the user who rented the car.',
@@ -56,21 +51,21 @@ export class BookingDTO {
     description: 'The start date of the booking',
     example: '2023-08-08T14:07:27.828Z',
   })
-  public readonly startDate!: ITimeProvider
+  public readonly startDate!: string
 
   @ApiProperty({
     description: 'The start date of the booking',
     example: '2023-08-08T14:07:27.828Z',
   })
-  public readonly endDate!: ITimeProvider
+  public readonly endDate!: string
 
   public static create(data: {
     id: BookingID
     carId: CarID
-    state: CarState
+    state: BookingState
     renterId: UserID
-    startDate: ITimeProvider
-    endDate: ITimeProvider
+    startDate: string
+    endDate: string
   }): BookingDTO {
     const instance = new BookingDTO() as Writable<BookingDTO>
     instance.id = data.id
@@ -86,3 +81,13 @@ export class BookingDTO {
     return BookingDTO.create(booking)
   }
 }
+
+export class CreateBookingDTO extends PickType(BookingDTO, [
+  'carId',
+  'startDate',
+  'endDate',
+] as const) {}
+
+export class PatchBookingDTO extends StrictPartialType( 
+  PickType(BookingDTO, ['state'] as const),
+) {}
