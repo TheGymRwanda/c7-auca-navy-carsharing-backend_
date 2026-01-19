@@ -1,5 +1,6 @@
 export * from './access-denied.error'
 export * from './authentication'
+export * from './booking'
 export * from './car'
 export * from './car-type'
 export * from './time-provider.interface'

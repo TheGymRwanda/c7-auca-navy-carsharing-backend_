@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common'
 
 import {
+  IBookingRepository,
   ICarRepository,
   ICarTypeRepository,
   IUserRepository,
 } from '../application'
 import {
+  BookingRepository,
   CarRepository,
   CarTypeRepository,
   UserRepository,
@@ -13,6 +15,10 @@ import {
 
 @Module({
   providers: [
+    {
+      provide: IBookingRepository,
+      useClass: BookingRepository,
+    },
     {
       provide: ICarRepository,
       useClass: CarRepository,
@@ -26,6 +32,11 @@ import {
       useClass: UserRepository,
     },
   ],
-  exports: [ICarRepository, ICarTypeRepository, IUserRepository],
+  exports: [
+    IBookingRepository,
+    ICarRepository,
+    ICarTypeRepository,
+    IUserRepository,
+  ],
 })
 export class RepositoryModule {}

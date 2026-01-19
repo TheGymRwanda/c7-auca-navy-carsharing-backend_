@@ -1,4 +1,5 @@
 export * from './application/authentication/authentication.service.mock'
+export * from './application/booking/booking.mock'
 export * from './application/car-type/car-type.repository.mock'
 export * from './application/car-type/car-type.service.mock'
 export * from './application/car/car.repository.mock'
