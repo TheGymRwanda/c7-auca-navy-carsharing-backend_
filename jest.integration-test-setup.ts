@@ -11,6 +11,8 @@ import * as glob from 'glob'
 import pgPromise, { IDatabase } from 'pg-promise'
 
 import {
+  Booking,
+  BookingID,
   Car,
   type CarID,
   CarState,
@@ -19,6 +21,7 @@ import {
   FuelType,
   User,
   type UserID,
+  BookingState
 } from './src/application'
 import { DatabaseConnectionConfig, type Transaction } from './src/persistence'
 
@@ -105,6 +108,26 @@ export const cars = {
     horsepower: 125,
     licensePlate: 'FOO-BAR 42',
     info: 'Please no scratches!',
+  }),
+}
+
+export const bookings = {
+  bob: new Booking({
+    id: 1 as BookingID,
+    carId: 2 as CarID,
+    renterId: 2 as UserID,
+    state: BookingState.PENDING,
+    startDate: '2026-01-15 09:00:00',
+    endDate: '2026-01-28 018:00:00',
+  }),
+
+  beatrice: new Booking({
+    id: 2 as BookingID,
+    carId: 3 as CarID,
+    renterId: 1 as UserID,
+    state: BookingState.PENDING,
+    startDate: '2026-02-10 07:00:00',
+    endDate: '2026-02-20 015:00:00',
   }),
 }
 
