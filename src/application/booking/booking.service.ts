@@ -8,6 +8,7 @@ import { UserID } from '../user'
 import { Booking, BookingID, BookingProperties } from './booking'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
+import { AccessDeniedError } from '../access-denied.error'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -37,10 +38,23 @@ export class BookingService implements IBookingService {
   }
 
   public update(
-    _updates: Except<BookingProperties, 'id'>,
+    _updates: Partial<Except<BookingProperties, 'id'>>,
     bookingId: BookingID,
     currentUserId: UserID,
   ): Promise<Booking> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(async _tx => {
+      const booking = await this.get(bookingId)
+      if (booking.renterId !== currentUserId) {
+        throw new AccessDeniedError(
+          'Updates not allowed for bookings you did not create',
+          booking.carId,
+        )
+      }
+      const updateBooking = {
+        ...booking,
+        ..._updates,
+      }
+      return this.bookingRepository.update(_tx, updateBooking)
+    })
   }
 }
