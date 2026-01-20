@@ -63,7 +63,8 @@ export class BookingController {
         endDate: data.endDate,
       })
       return BookingDTO.fromModel(booking)
-    } catch {
+    } catch (error) {
+      console.error('Booking creation error:', error)
       throw new InternalServerErrorException('Failed to create booking')
     }
   }

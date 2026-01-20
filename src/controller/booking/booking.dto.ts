@@ -1,6 +1,7 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { IsDate, IsInt, IsPositive } from 'class-validator'
 import { type Writable } from 'type-fest'
+import { Type } from 'class-transformer'
 
 import {
   type Booking,
@@ -48,6 +49,7 @@ export class BookingDTO {
     format: 'date-time',
     example: '2024-01-20T10:00:00Z',
   })
+  @Type(() => Date)
   @IsDate()
   public readonly startDate!: Date
 
@@ -57,6 +59,7 @@ export class BookingDTO {
     format: 'date-time',
     example: '2024-01-25T10:00:00Z',
   })
+  @Type(() => Date)
   @IsDate()
   public readonly endDate!: Date
 
