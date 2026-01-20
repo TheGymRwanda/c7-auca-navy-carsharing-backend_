@@ -57,8 +57,21 @@ export class BookingRepository extends IBookingRepository {
     return rows.map(row => rowToDomain(row))
   }
 
-  public update(_tx: Transaction, booking: Booking): Promise<Booking> {
-    throw new Error('Not implemented')
+  public async update(_tx: Transaction, booking: Booking): Promise<Booking> {
+    const row = await _tx.oneOrNone<Row>(
+      `UPDATE bookings SET
+        state = $(state)
+      WHERE id = $(id)
+      RETURNING *
+      `,
+      { ...booking },
+    )
+
+    if (row === null) {
+      throw new BookingNotFoundError(booking.id)
+    }
+
+    return rowToDomain(row)
   }
 
   public insert(

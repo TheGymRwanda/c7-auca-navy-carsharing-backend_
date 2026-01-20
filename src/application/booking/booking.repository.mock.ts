@@ -1,6 +1,6 @@
 import type { IBookingRepository } from './booking.repository.interface'
 
-export type BookingRepositoryMock = jest.Mock<IBookingRepository>
+export type BookingRepositoryMock = jest.Mocked<IBookingRepository>
 
 export function mockBookingRepository() {
   return {

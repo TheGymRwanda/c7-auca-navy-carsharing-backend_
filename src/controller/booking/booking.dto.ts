@@ -88,6 +88,6 @@ export class CreateBookingDTO extends PickType(BookingDTO, [
   'endDate',
 ] as const) {}
 
-export class PatchBookingDTO extends StrictPartialType( 
+export class PatchBookingDTO extends StrictPartialType(
   PickType(BookingDTO, ['state'] as const),
 ) {}

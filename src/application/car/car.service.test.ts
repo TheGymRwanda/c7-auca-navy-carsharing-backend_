@@ -4,7 +4,7 @@ import {
   mockCarRepository,
   mockDatabaseConnection,
   mockCarTypeService,
-  CarTypeServiceMock
+  CarTypeServiceMock,
 } from '../../mocks'
 import { UserBuilder } from '../user/user.builder'
 

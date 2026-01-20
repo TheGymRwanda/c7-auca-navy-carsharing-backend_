@@ -14,7 +14,7 @@ export abstract class IBookingService {
   ): Promise<Booking>
 
   public abstract update(
-    _updates: Except<BookingProperties, 'id'>,
+    _updates: Partial<Except<BookingProperties, 'id'>>,
     bookingId: BookingID,
     currentUserId: UserID,
   ): Promise<Booking>
