@@ -14,7 +14,6 @@ import {
 import { ConfigModule } from './config.module'
 import { ServiceModule } from './service.module'
 
-
 @Module({
   imports: [
     JwtModule.registerAsync({
