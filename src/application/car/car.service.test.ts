@@ -3,6 +3,8 @@ import {
   type DatabaseConnectionMock,
   mockCarRepository,
   mockDatabaseConnection,
+  mockCarTypeService,
+  CarTypeServiceMock
 } from '../../mocks'
 import { UserBuilder } from '../user/user.builder'
 
@@ -11,14 +13,20 @@ import { CarService } from './car.service'
 
 describe('CarService', () => {
   let carService: CarService
+  let carTypeServiceMock: CarTypeServiceMock
   let carRepositoryMock: CarRepositoryMock
   let databaseConnectionMock: DatabaseConnectionMock
 
   beforeEach(() => {
     carRepositoryMock = mockCarRepository()
     databaseConnectionMock = mockDatabaseConnection()
+    carTypeServiceMock = mockCarTypeService()
 
-    carService = new CarService(carRepositoryMock, databaseConnectionMock)
+    carService = new CarService(
+      carTypeServiceMock,
+      carRepositoryMock,
+      databaseConnectionMock,
+    )
   })
 
   describe('create', () => {
