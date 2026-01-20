@@ -1,4 +1,12 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards, Patch, Body} from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  Patch,
+  Body,
+} from '@nestjs/common'
 import {
   ApiBearerAuth,
   ApiUnauthorizedResponse,
@@ -14,9 +22,10 @@ import { Booking, BookingID, User } from 'src/application'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
 
 import { AuthenticationGuard } from '../authentication.guard'
+import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, PatchBookingDTO } from './booking.dto'
-import { CurrentUser } from '../current-user.decorator'
+
 
 @ApiTags(Booking.name)
 @ApiBearerAuth()
@@ -70,7 +79,7 @@ export class BookingController {
   @Patch(':id')
   public async patch(
     @Body() data: PatchBookingDTO,
-    @Param('id') id: BookingID,
+    @Param('id', ParseIntPipe) id: BookingID,
     @CurrentUser() user: User,
   ) {
     return await this.bookingService.update(data, id, user.id)

@@ -62,6 +62,7 @@ export class BookingRepository extends IBookingRepository {
       `UPDATE bookings SET
         state = $(state)
       WHERE id = $(id)
+      RETURNING *
       `,
       { ...booking },
     )
