@@ -17,8 +17,8 @@ export class BookingBuilder {
     carId: 2 as CarID,
     renterId: 1 as UserID,
     state: BookingState.PENDING,
-    startDate: '2025-12-15T07:00:00.000Z',
-    endDate: '2026-01-15T07:00:00.000Z',
+    startDate: new Date('2025-12-15T07:00:00.000Z') as unknown as string,
+    endDate: new Date('2026-01-15T07:00:00.000Z') as unknown as string,
   }
 
   public static from(
@@ -34,9 +34,15 @@ export class BookingBuilder {
       const value = properties[key]
 
       if (value !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.properties[key] = value
+        if (key === 'startDate' || key === 'endDate') {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          this.properties[key] = new Date(value as string)
+        } else {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          this.properties[key] = value
+        }
       }
     }
 
@@ -63,13 +69,13 @@ export class BookingBuilder {
     return this
   }
 
-  public withStartDate(date: string): this {
-    this.properties.startDate = date
+  public withStartDate(date: string | Date): this {
+    this.properties.startDate = new Date(date) as unknown as string
     return this
   }
 
-  public withEndDate(date: string): this {
-    this.properties.endDate = date
+  public withEndDate(date: string | Date): this {
+    this.properties.endDate = new Date(date) as unknown as string
     return this
   }
 

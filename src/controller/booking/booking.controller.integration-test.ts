@@ -5,6 +5,7 @@ import request from 'supertest'
 import {
   BookingID,
   BookingNotFoundError,
+  AccessDeniedError,
   CarID,
   IBookingService,
   UserID,
@@ -88,6 +89,23 @@ describe('BookingController', () => {
           startDate: '2026-01-10T07:00:00.000Z',
           endDate: '2026-01-15T07:00:00.000Z',
         })
+      expect(bookingServiceMock.get).toHaveBeenCalledWith(
+        bookingOne.id,
+        user.id,
+      )
+    })
+
+    it('should return a 401 when AccessDeniedError is thrown', async () => {
+      const bookingId = 15 as BookingID
+      bookingServiceMock.get.mockRejectedValue(
+        new AccessDeniedError('Access denied', 0),
+      )
+
+      await request(app.getHttpServer())
+        .get(`/bookings/${bookingId}`)
+        .expect(HttpStatus.UNAUTHORIZED)
+
+      expect(bookingServiceMock.get).toHaveBeenCalledWith(bookingId, user.id)
     })
 
     it('should return a 400', async () => {
@@ -103,8 +121,9 @@ describe('BookingController', () => {
       )
 
       await request(app.getHttpServer())
-        .get(`/car/${bookingId}`)
+        .get(`/bookings/${bookingId}`)
         .expect(HttpStatus.NOT_FOUND)
+      expect(bookingServiceMock.get).toHaveBeenCalledWith(bookingId, user.id)
     })
   })
 
@@ -171,8 +190,8 @@ describe('BookingController', () => {
         carId: 5,
         renterId: user.id,
         state: BookingState.PENDING,
-        startDate: '2026-03-10T07:00:00.000Z',
-        endDate: '2026-03-15T07:00:00.000Z',
+        startDate: new Date('2026-03-10T07:00:00.000Z'),
+        endDate: new Date('2026-03-15T07:00:00.000Z'),
       })
     })
 
