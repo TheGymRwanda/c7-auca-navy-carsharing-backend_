@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Param,
   ParseIntPipe,
   UseGuards,
   Patch,
+  Post,
   Body,
 } from '@nestjs/common'
 import {
@@ -16,16 +18,18 @@ import {
   ApiOkResponse,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger'
 
 import { Booking, BookingID, User } from 'src/application'
+import { BookingState } from 'src/application/booking/booking-state'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
+import { InvalidBookingDateError } from 'src/application/booking/invalid-booking-date.error'
 
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
-import { BookingDTO, PatchBookingDTO } from './booking.dto'
-
+import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
 
 @ApiTags(Booking.name)
 @ApiBearerAuth()
@@ -76,6 +80,37 @@ export class BookingController {
   ): Promise<BookingDTO> {
     return await this.bookingService.get(id)
   }
+  @ApiOperation({
+    summary: 'Create a new booking',
+  })
+  @ApiCreatedResponse({
+    description: 'The booking was created successfully.',
+    type: BookingDTO,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The request was malformed, e.g. invalid params or property in request body',
+  })
+  @Post()
+  public async create(
+    @Body() data: CreateBookingDTO,
+    @CurrentUser() user: User,
+  ): Promise<BookingDTO> {
+    try {
+      const booking = await this.bookingService.create({
+        ...data,
+        renterId: user.id,
+        state: BookingState.PENDING,
+      })
+      return BookingDTO.fromModel(booking)
+    } catch (error) {
+      if (error instanceof InvalidBookingDateError) {
+        throw new BadRequestException(error.message)
+      }
+      throw error
+    }
+  }
+
   @Patch(':id')
   public async patch(
     @Body() data: PatchBookingDTO,

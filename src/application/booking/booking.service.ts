@@ -3,12 +3,13 @@ import { Except } from 'type-fest'
 
 import { IDatabaseConnection } from 'src/persistence/database-connection.interface'
 
+import { AccessDeniedError } from '../access-denied.error'
 import { UserID } from '../user'
 
 import { Booking, BookingID, BookingProperties } from './booking'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
-import { AccessDeniedError } from '../access-denied.error'
+import { InvalidBookingDateError } from './invalid-booking-date.error'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -33,8 +34,18 @@ export class BookingService implements IBookingService {
     )
   }
 
-  public create(_data: Except<BookingProperties, 'id'>): Promise<Booking> {
-    throw new Error('Not implemented')
+  public async create(
+    _data: Except<BookingProperties, 'id'>,
+  ): Promise<Booking> {
+    if (new Date(_data.startDate) > new Date(_data.endDate)) {
+      throw new InvalidBookingDateError(
+        'The start date cannot be after the end date',
+      )
+    }
+
+    return this.databaseConnection.transactional(tx =>
+      this.bookingRepository.insert(tx, _data),
+    )
   }
 
   public update(
