@@ -133,4 +133,21 @@ describe('BookingController', () => {
         ])
     })
   })
+
+  describe('patch', () => {
+    it('should update a booking', async () => {
+      await request(app.getHttpServer())
+        .patch(`/bookings/${bookingOne.id}`)
+        .send({ state: BookingState.ACCEPTED })
+        .expect(HttpStatus.OK)
+        .expect({ ...bookingOne, state: BookingState.ACCEPTED })
+    })
+
+    it('should reject an invalid booking state transition', async () => {
+      await request(app.getHttpServer())
+        .patch(`/bookings/${bookingOne.id}`)
+        .send({ state: BookingState.PICKED_UP })
+        .expect(HttpStatus.BAD_REQUEST)
+    })
+  })
 })

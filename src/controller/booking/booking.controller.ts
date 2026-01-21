@@ -6,6 +6,7 @@ import {
   UseGuards,
   Patch,
   Body,
+  BadRequestException,
 } from '@nestjs/common'
 import {
   ApiBearerAuth,
@@ -18,14 +19,13 @@ import {
   ApiNotFoundResponse,
 } from '@nestjs/swagger'
 
-import { Booking, BookingID, User } from 'src/application'
+import { Booking, BookingID, BookingInvalidError, User } from 'src/application'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
 
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, PatchBookingDTO } from './booking.dto'
-
 
 @ApiTags(Booking.name)
 @ApiBearerAuth()
@@ -81,7 +81,16 @@ export class BookingController {
     @Body() data: PatchBookingDTO,
     @Param('id', ParseIntPipe) id: BookingID,
     @CurrentUser() user: User,
-  ) {
-    return await this.bookingService.update(data, id, user.id)
+  ): Promise<BookingDTO> {
+    try {
+      return await this.bookingService.update(data, id, user.id)
+    } catch (error) {
+      if (error instanceof BookingInvalidError) {
+        throw new BadRequestException(
+          'Booking state is invalid or contains unexpected data, please try again.',
+        )
+      }
+      throw error
+    }
   }
 }
