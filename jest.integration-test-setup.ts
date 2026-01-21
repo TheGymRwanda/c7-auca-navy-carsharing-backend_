@@ -11,6 +11,8 @@ import * as glob from 'glob'
 import pgPromise, { IDatabase } from 'pg-promise'
 
 import {
+  Booking,
+  BookingID,
   Car,
   type CarID,
   CarState,
@@ -19,6 +21,7 @@ import {
   FuelType,
   User,
   type UserID,
+  BookingState
 } from './src/application'
 import { DatabaseConnectionConfig, type Transaction } from './src/persistence'
 
@@ -45,7 +48,7 @@ export type IntegrationTestSetup = {
 // These objects mirror the data in the fixture. The purpose of this is to make the integration tests more concise and
 // readable.
 export const carTypes = {
-  car550: new CarType({
+  fiat: new CarType({
     id: 1 as CarTypeID,
     name: `Car 550`,
     imageUrl: 'https://images.local/car-550.png',
@@ -87,7 +90,7 @@ export const cars = {
   beatrice: new Car({
     id: 1 as CarID,
     ownerId: users.beatrice.id,
-    carTypeId: carTypes.car550.id,
+    carTypeId: carTypes.fiat.id,
     name: `Beatrice's Car`,
     state: CarState.LOCKED,
     fuelType: FuelType.ELECTRIC,
@@ -105,6 +108,26 @@ export const cars = {
     horsepower: 125,
     licensePlate: 'FOO-BAR 42',
     info: 'Please no scratches!',
+  }),
+}
+
+export const bookings = {
+  bob: new Booking({
+    id: 1 as BookingID,
+    carId: 2 as CarID,
+    renterId: 2 as UserID,
+    state: BookingState.PENDING,
+    startDate: '2026-01-15T09:00:00Z',
+    endDate: '2026-01-28T18:00:00Z',
+  }),
+
+  beatrice: new Booking({
+    id: 2 as BookingID,
+    carId: 3 as CarID,
+    renterId: 1 as UserID,
+    state: BookingState.PENDING,
+    startDate: '2026-02-10T07:00:00Z',
+    endDate: '2026-02-20T15:00:00Z',
   }),
 }
 
