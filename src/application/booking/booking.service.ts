@@ -39,7 +39,7 @@ public async create(
 ): Promise<Booking> {
   const { carId, startDate, endDate } = _data;
 
-  // 1️⃣ Validate dates (end must be after start)
+  
   if (new Date(startDate) > new Date(endDate)) {
     throw new InvalidBookingDateError(
       'The start date cannot be after the end date',
