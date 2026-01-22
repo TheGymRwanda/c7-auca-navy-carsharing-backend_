@@ -53,7 +53,7 @@ export class BookingDTO {
   })
   @Type(() => Date)
   @IsDate()
-  public readonly startDate!: string
+  public readonly startDate!: Date
 
   @ApiProperty({
     description: 'The end date of the booking',
@@ -61,7 +61,7 @@ export class BookingDTO {
   })
   @Type(() => Date)
   @IsDate()
-  public readonly endDate!: string
+  public readonly endDate!: Date
 
   public static create(data: Booking): BookingDTO {
     const instance = new BookingDTO() as Writable<BookingDTO>

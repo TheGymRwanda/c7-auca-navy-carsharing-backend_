@@ -19,8 +19,8 @@ type Row = {
   car_id: CarID
   state: BookingState
   renter_id: UserID
-  start_date: string
-  end_date: string
+  start_date: Date
+  end_date: Date
 }
 
 function rowToDomain(row: Row) {
@@ -29,7 +29,7 @@ function rowToDomain(row: Row) {
     carId: row.car_id,
     state: row.state as BookingState,
     renterId: row.renter_id,
-    startDate: row.start_date,
+    startDate: new Date(row.start_date),
     endDate: row.end_date,
   })
 }

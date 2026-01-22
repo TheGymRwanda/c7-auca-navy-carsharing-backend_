@@ -92,8 +92,8 @@ describe('BookingService', () => {
         carId,
         renterId: renter.id,
         state: BookingState.PENDING,
-        startDate: '2026-01-10T07:00:00.000Z',
-        endDate: '2026-01-15T07:00:00.000Z',
+        startDate: new Date('2026-01-10T07:00:00.000Z'),
+        endDate: new Date('2026-01-15T07:00:00.000Z'),
       }
       const expectedBooking = new BookingBuilder()
         .withCarId(carId)
@@ -121,8 +121,8 @@ describe('BookingService', () => {
         carId,
         renterId: renter.id,
         state: BookingState.PENDING,
-        startDate: '2026-01-15T07:00:00.000Z',
-        endDate: '2026-01-10T07:00:00.000Z',
+        startDate: new Date('2026-01-15T07:00:00.000Z'),
+        endDate: new Date('2026-01-10T07:00:00.000Z'),
       }
 
       await expect(bookingService.create(bookingData)).rejects.toThrow(
