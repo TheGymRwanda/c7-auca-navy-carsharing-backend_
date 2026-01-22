@@ -6,7 +6,7 @@ import { UserID } from '../user'
 import { Booking, BookingID, BookingProperties } from './booking'
 
 export abstract class IBookingService {
-  public abstract get(id: BookingID): Promise<Booking>
+  public abstract get(id: BookingID, currentUserId: UserID): Promise<Booking>
 
   public abstract getAll(): Promise<Booking[]>
 

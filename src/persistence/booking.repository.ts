@@ -20,8 +20,8 @@ type Row = {
   car_id: CarID
   state: BookingState
   renter_id: UserID
-  start_date: string
-  end_date: string
+  start_date: Date
+  end_date: Date
 }
 
 function rowToDomain(row: Row) {
@@ -30,7 +30,7 @@ function rowToDomain(row: Row) {
     carId: row.car_id,
     state: row.state as BookingState,
     renterId: row.renter_id,
-    startDate: row.start_date,
+    startDate: new Date(row.start_date),
     endDate: row.end_date,
   })
 }
@@ -90,10 +90,22 @@ export class BookingRepository extends IBookingRepository {
     return rowToDomain(row)
   }
 
-  public insert(
+  public async insert(
     _tx: Transaction,
     booking: Except<BookingProperties, 'id'>,
   ): Promise<Booking> {
-    throw new Error('Not implemented')
+    const row = await _tx.one<Row>(
+      `INSERT INTO bookings (car_id, state, renter_id, start_date, end_date)
+       VALUES ($(carId), $(state), $(renterId), $(startDate), $(endDate))
+       RETURNING *`,
+      {
+        carId: booking.carId,
+        state: booking.state,
+        renterId: booking.renterId,
+        startDate: booking.startDate,
+        endDate: booking.endDate,
+      },
+    )
+    return rowToDomain(row)
   }
 }
