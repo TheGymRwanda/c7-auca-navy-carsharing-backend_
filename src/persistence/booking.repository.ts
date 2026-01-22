@@ -8,6 +8,7 @@ import {
   CarID,
   UserID,
   BookingNotFoundError,
+  AccessDeniedError,
 } from 'src/application'
 import { BookingState } from 'src/application/booking/booking-state'
 import { IBookingRepository } from 'src/application/booking/booking.repository.interface'
@@ -36,7 +37,7 @@ function rowToDomain(row: Row) {
 
 @Injectable()
 export class BookingRepository extends IBookingRepository {
-  public async find(_tx: Transaction, id: BookingID): Promise<Booking>{
+  public async find(_tx: Transaction, id: BookingID): Promise<Booking> {
     const row = await _tx.oneOrNone<Row>(
       'SELECT * FROM bookings WHERE id = ${id}',
       { id },
@@ -46,6 +47,21 @@ export class BookingRepository extends IBookingRepository {
     }
     return rowToDomain(row)
   }
+  public async findRenterBooking(
+    _tx: Transaction,
+    renterId: UserID,
+    carId: CarID,
+  ): Promise<boolean> {
+    const row = await _tx.manyOrNone<Row>(
+      `SELECT * FROM bookings WHERE renter_id = $(renterId) AND car_id = $(carId)`,
+      { renterId, carId },
+    )
+    if (row === null || row.length === 0) {
+      throw new AccessDeniedError('User is not a renter', renterId)
+    }
+    return true
+  }
+
   public async get(_tx: Transaction, id: BookingID): Promise<Booking> {
     const booking = await this.find(_tx, id)
     if (!booking) throw new BookingNotFoundError(id)
