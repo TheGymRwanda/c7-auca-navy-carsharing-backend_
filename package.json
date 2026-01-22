@@ -20,7 +20,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
-    "db:start": "docker run --rm --detach --publish=5432:5432 -e POSTGRES_PASSWORD=12345 -e POSTGRES_USER=postgres -e POSTGRES_DB=carsharing --name carsharing --mount type=bind,source=\"C:\\Users\\lenovo\\Documents\\c7-auca-navy-carsharing-backend_/fixture\",target=/fixture,readonly postgres:15-alpine",
+    "db:start": "docker run --rm --detach --publish=5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=carsharing --name carsharing --mount type=bind,source=\"$(pwd)/fixture\",target=/fixture,readonly postgres:15-alpine",
     "db:migrate-up": "node-pg-migrate --config-file pgmigrate.config.json up",
     "db:load-fixture": "docker exec carsharing /bin/bash -c \"find /fixture -type f | sort | xargs -I {} psql --username=postgres --dbname carsharing -f {}\"",
     "dev:docker": "docker-compose up --build -d",
