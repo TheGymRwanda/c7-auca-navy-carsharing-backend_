@@ -76,7 +76,7 @@ describe('BookingService', () => {
   })
 
   describe('update', () => {
-    xit('should uupdate a booking', async () => {
+    xit('should update a booking', async () => {
       const renter = new UserBuilder().build()
       const carId = 4 as CarID
       const booking = new BookingBuilder()
@@ -91,6 +91,23 @@ describe('BookingService', () => {
       await expect(
         bookingService.update(updatedBooking, booking.id, renter.id),
       ).resolves.toEqual(updatedBooking)
+    })
+
+    xit('should deny an update with invalid booking transition', async () => {
+      const renter = new UserBuilder().build()
+      const carId = 5 as CarID
+      const booking = new BookingBuilder()
+        .withCarId(carId)
+        .withState(BookingState.PENDING)
+        .withRenterId(renter.id)
+        .build()
+      const updatedBooking = BookingBuilder.from(booking)
+        .withState(BookingState.PICKED_UP)
+        .build()
+
+      await expect(
+        bookingService.update(updatedBooking, booking.id, renter.id),
+      ).resolves.toReject()
     })
   })
 })

@@ -30,6 +30,7 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
+import { BookingInvalidError } from 'src/application/booking/booking-invalid-error'
 
 @ApiTags(Booking.name)
 @ApiBearerAuth()
@@ -116,7 +117,16 @@ export class BookingController {
     @Body() data: PatchBookingDTO,
     @Param('id', ParseIntPipe) id: BookingID,
     @CurrentUser() user: User,
-  ) {
-    return await this.bookingService.update(data, id, user.id)
+  ): Promise<BookingDTO> {
+    try {
+      return await this.bookingService.update(data, id, user.id)
+    } catch (error) {
+      if (error instanceof BookingInvalidError) {
+        throw new BadRequestException(
+          'Booking state is invalid or contains unexpected data, please try again.',
+        )
+      }
+      throw error
+    }
   }
 }
