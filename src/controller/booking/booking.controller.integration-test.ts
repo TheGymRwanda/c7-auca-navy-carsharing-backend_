@@ -5,6 +5,7 @@ import request from 'supertest'
 import {
   BookingID,
   BookingNotFoundError,
+  AccessDeniedError,
   CarID,
   IBookingService,
   UserID,
@@ -34,8 +35,8 @@ describe('BookingController', () => {
     carId: 2 as CarID,
     renterId: 5 as UserID,
     state: BookingState.PENDING,
-    startDate: '2026-01-10T07:00:00.000Z',
-    endDate: '2026-01-15T07:00:00.000Z',
+    startDate: new Date('2026-01-10T07:00:00.000Z'),
+    endDate: new Date('2026-01-15T07:00:00.000Z'),
   }).build()
 
   const bookingTwo = BookingBuilder.from({
@@ -43,8 +44,8 @@ describe('BookingController', () => {
     carId: 4 as CarID,
     renterId: 7 as UserID,
     state: BookingState.PENDING,
-    startDate: '2026-02-10T07:00:00.000Z',
-    endDate: '2026-02-15T07:00:00.000Z',
+    startDate: new Date('2026-02-10T07:00:00.000Z'),
+    endDate: new Date('2026-02-15T07:00:00.000Z'),
   }).build()
 
   let app: INestApplication
@@ -89,6 +90,23 @@ describe('BookingController', () => {
           startDate: '2026-01-10T07:00:00.000Z',
           endDate: '2026-01-15T07:00:00.000Z',
         })
+      expect(bookingServiceMock.get).toHaveBeenCalledWith(
+        bookingOne.id,
+        user.id,
+      )
+    })
+
+    it('should return a 401 when AccessDeniedError is thrown', async () => {
+      const bookingId = 15 as BookingID
+      bookingServiceMock.get.mockRejectedValue(
+        new AccessDeniedError('Access denied', 0),
+      )
+
+      await request(app.getHttpServer())
+        .get(`/bookings/${bookingId}`)
+        .expect(HttpStatus.UNAUTHORIZED)
+
+      expect(bookingServiceMock.get).toHaveBeenCalledWith(bookingId, user.id)
     })
 
     it('should return 400 for invalid id', async () => {
@@ -106,6 +124,7 @@ describe('BookingController', () => {
       await request(app.getHttpServer())
         .get(`/bookings/${bookingId}`)
         .expect(HttpStatus.NOT_FOUND)
+      expect(bookingServiceMock.get).toHaveBeenCalledWith(bookingId, user.id)
     })
   })
 
@@ -141,8 +160,8 @@ describe('BookingController', () => {
     it('should create a booking', async () => {
       const payload = {
         carId: 5,
-        startDate: '2026-03-10T07:00:00.000Z',
-        endDate: '2026-03-15T07:00:00.000Z',
+        startDate: new Date('2026-03-10T07:00:00.000Z'),
+        endDate: new Date('2026-03-15T07:00:00.000Z'),
       }
 
       const createdBooking = BookingBuilder.from({
@@ -168,6 +187,65 @@ describe('BookingController', () => {
           startDate: payload.startDate,
           endDate: payload.endDate,
         })
+
+      expect(bookingServiceMock.create).toHaveBeenCalledWith({
+        carId: 5,
+        renterId: user.id,
+        state: BookingState.PENDING,
+        startDate: new Date('2026-03-10T07:00:00.000Z'),
+        endDate: new Date('2026-03-15T07:00:00.000Z'),
+      })
+    })
+
+    it('should return 400 when carId is missing', async () => {
+      const invalidData = {
+        startDate: '2026-03-10T07:00:00.000Z',
+        endDate: '2026-03-15T07:00:00.000Z',
+      }
+
+      await request(app.getHttpServer())
+        .post('/bookings')
+        .send(invalidData)
+        .expect(HttpStatus.BAD_REQUEST)
+    })
+
+    it('should return 400 when startDate is invalid', async () => {
+      const invalidData = {
+        carId: 5,
+        startDate: 'invalid-date',
+        endDate: '2026-03-15T07:00:00.000Z',
+      }
+
+      await request(app.getHttpServer())
+        .post('/bookings')
+        .send(invalidData)
+        .expect(HttpStatus.BAD_REQUEST)
+    })
+
+    it('should return 400 when endDate is invalid', async () => {
+      const invalidData = {
+        carId: 5,
+        startDate: '2026-03-10T07:00:00.000Z',
+        endDate: 'invalid-date',
+      }
+
+      await request(app.getHttpServer())
+        .post('/bookings')
+        .send(invalidData)
+        .expect(HttpStatus.BAD_REQUEST)
+    })
+
+    it('should return 400 when carId is not a positive integer', async () => {
+      const invalidData = {
+        carId: -1,
+        startDate: '2026-03-10T07:00:00.000Z',
+        endDate: '2026-03-15T07:00:00.000Z',
+      }
+
+      await request(app.getHttpServer())
+        .post('/bookings')
+        .send(invalidData)
+        .expect(HttpStatus.BAD_REQUEST)
     })
 
     it('should return 400 when startDate is after endDate', async () => {

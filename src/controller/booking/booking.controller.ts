@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Body,
+  UnauthorizedException,
 } from '@nestjs/common'
 import {
   ApiBearerAuth,
@@ -21,7 +22,7 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger'
 
-import { Booking, BookingID, User } from 'src/application'
+import { AccessDeniedError, Booking, BookingID, User } from 'src/application'
 import { BookingState } from 'src/application/booking/booking-state'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
 import { InvalidBookingDateError } from 'src/application/booking/invalid-booking-date.error'
@@ -75,11 +76,22 @@ export class BookingController {
   @ApiNotFoundResponse({
     description: 'No booking with the given id was found',
   })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not allowed to access this booking',
+  })
   @Get(':id')
   public async get(
     @Param('id', ParseIntPipe) id: BookingID,
+    @CurrentUser() user: User,
   ): Promise<BookingDTO> {
-    return await this.bookingService.get(id)
+    try {
+      return await this.bookingService.get(id, user.id)
+    } catch (error) {
+      if (error instanceof AccessDeniedError) {
+        throw new UnauthorizedException(error.message)
+      }
+      throw error
+    }
   }
   @ApiOperation({
     summary: 'Create a new booking',

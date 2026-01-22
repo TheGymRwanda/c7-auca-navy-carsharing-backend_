@@ -21,7 +21,7 @@ import {
   FuelType,
   User,
   type UserID,
-  BookingState
+  BookingState,
 } from './src/application'
 import { DatabaseConnectionConfig, type Transaction } from './src/persistence'
 
@@ -117,8 +117,8 @@ export const bookings = {
     carId: 2 as CarID,
     renterId: 2 as UserID,
     state: BookingState.PENDING,
-    startDate: '2026-01-15T09:00:00Z',
-    endDate: '2026-01-28T18:00:00Z',
+    startDate: new Date('2026-01-15T09:00:00Z'),
+    endDate: new Date('2026-01-28T18:00:00Z'),
   }),
 
   beatrice: new Booking({
@@ -126,8 +126,8 @@ export const bookings = {
     carId: 3 as CarID,
     renterId: 1 as UserID,
     state: BookingState.PENDING,
-    startDate: '2026-02-10T07:00:00Z',
-    endDate: '2026-02-20T15:00:00Z',
+    startDate: new Date('2026-02-10T07:00:00Z'),
+    endDate: new Date('2026-02-20T15:00:00Z'),
   }),
 }
 
