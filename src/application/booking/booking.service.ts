@@ -11,6 +11,7 @@ import { BookingInvalidError } from './booking-invalid-error'
 import { BookingState } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
+import { InvalidBookingDateError } from './invalid-booking-date.error'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -35,8 +36,18 @@ export class BookingService implements IBookingService {
     )
   }
 
-  public create(_data: Except<BookingProperties, 'id'>): Promise<Booking> {
-    throw new Error('Not implemented')
+  public async create(
+    _data: Except<BookingProperties, 'id'>,
+  ): Promise<Booking> {
+    if (new Date(_data.startDate) > new Date(_data.endDate)) {
+      throw new InvalidBookingDateError(
+        'The start date cannot be after the end date',
+      )
+    }
+
+    return this.databaseConnection.transactional(tx =>
+      this.bookingRepository.insert(tx, _data),
+    )
   }
 
   public validateBooking(updateBookingState: BookingState, booking: Booking) {

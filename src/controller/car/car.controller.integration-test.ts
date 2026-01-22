@@ -155,7 +155,7 @@ describe('CarController', () => {
 
   describe('create', () => {
     it('should create a new car', async () => {
-      const newCar = new CarBuilder().withId(27).build()
+      const newCar = new CarBuilder().withId(27).withOwner(42).build()
       carServiceMock.create.mockResolvedValue(newCar)
       authenticationGuardMock.user = UserBuilder.from(user).build()
 
@@ -164,8 +164,6 @@ describe('CarController', () => {
         .send({
           carTypeId: newCar.id,
           name: newCar.name,
-          ownerId: newCar.ownerId,
-          state: newCar.state,
           fuelType: newCar.fuelType,
           horsepower: newCar.horsepower,
           licensePlate: newCar.licensePlate,

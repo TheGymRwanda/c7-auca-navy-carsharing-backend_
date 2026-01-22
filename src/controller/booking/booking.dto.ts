@@ -1,11 +1,12 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
-import { IsInt, IsPositive, IsEnum } from 'class-validator'
+import { IsInt, IsPositive, IsEnum, IsDate } from 'class-validator'
 import { Writable } from 'type-fest'
 
 import { CarID, UserID, Booking } from 'src/application'
 import { type BookingID } from 'src/application/booking/booking'
 import { BookingState } from 'src/application/booking/booking-state'
 import { StrictPartialType, validate } from 'src/util'
+import { Type } from 'class-transformer'
 
 export class BookingDTO {
   @ApiProperty({
@@ -24,7 +25,6 @@ export class BookingDTO {
     type: 'integer',
     minimum: 1,
     example: 13,
-    readOnly: true,
   })
   @IsInt()
   @IsPositive()
@@ -51,22 +51,19 @@ export class BookingDTO {
     description: 'The start date of the booking',
     example: '2023-08-08T14:07:27.828Z',
   })
+  @Type(() => Date)
+  @IsDate()
   public readonly startDate!: string
 
   @ApiProperty({
-    description: 'The start date of the booking',
+    description: 'The end date of the booking',
     example: '2023-08-08T14:07:27.828Z',
   })
+  @Type(() => Date)
+  @IsDate()
   public readonly endDate!: string
 
-  public static create(data: {
-    id: BookingID
-    carId: CarID
-    state: BookingState
-    renterId: UserID
-    startDate: string
-    endDate: string
-  }): BookingDTO {
+  public static create(data: Booking): BookingDTO {
     const instance = new BookingDTO() as Writable<BookingDTO>
     instance.id = data.id
     instance.carId = data.carId
