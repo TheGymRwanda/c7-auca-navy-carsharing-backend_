@@ -8,6 +8,8 @@ import { ICarRepository } from '../car/car.repository.interface'
 import { UserID } from '../user'
 
 import { Booking, BookingID, BookingProperties } from './booking'
+import { BookingInvalidError } from './booking-invalid-error'
+import { BookingState } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
 import { InvalidBookingDateError } from './invalid-booking-date.error'
@@ -62,6 +64,21 @@ export class BookingService implements IBookingService {
     )
   }
 
+  public validateBooking(updateBookingState: BookingState, booking: Booking) {
+    if (
+      (updateBookingState === BookingState.ACCEPTED &&
+        booking.state === BookingState.PENDING) ||
+      (updateBookingState === BookingState.DECLINED &&
+        booking.state === BookingState.PENDING) ||
+      (updateBookingState === BookingState.PICKED_UP &&
+        booking.state === BookingState.ACCEPTED) ||
+      (updateBookingState === BookingState.RETURNED &&
+        booking.state === BookingState.PICKED_UP)
+    ) {
+      return true
+    }
+    throw new BookingInvalidError(booking.id)
+  }
   public update(
     _updates: Partial<Except<BookingProperties, 'id'>>,
     bookingId: BookingID,
@@ -75,6 +92,8 @@ export class BookingService implements IBookingService {
           booking.carId,
         )
       }
+      const bookingState = _updates.state as BookingState
+      this.validateBooking(bookingState, booking)
       const updateBooking = {
         ...booking,
         ..._updates,
