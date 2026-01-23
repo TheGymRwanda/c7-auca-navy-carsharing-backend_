@@ -4,6 +4,7 @@ import { Except } from 'type-fest'
 import { IDatabaseConnection } from 'src/persistence/database-connection.interface'
 
 import { AccessDeniedError } from '../access-denied.error'
+import { CarID } from '../car/car'
 import { ICarRepository } from '../car/car.repository.interface'
 import { UserID } from '../user'
 
@@ -62,6 +63,15 @@ export class BookingService implements IBookingService {
     return this.databaseConnection.transactional(tx =>
       this.bookingRepository.insert(tx, _data),
     )
+  }
+
+  public async findRenterBooking(
+    carId: CarID,
+    renterId: UserID,
+  ): Promise<boolean> {
+    return this.databaseConnection.transactional(async tx => {
+      return await this.bookingRepository.findRenterBooking(tx, renterId, carId)
+    })
   }
 
   public validateBooking(updateBookingState: BookingState, booking: Booking) {

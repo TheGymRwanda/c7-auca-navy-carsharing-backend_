@@ -7,6 +7,7 @@ export function mockBookingRepository() {
     get: jest.fn(),
     getAll: jest.fn(),
     insert: jest.fn(),
+    findRenterBooking: jest.fn(),
     update: jest.fn(),
   }
 }

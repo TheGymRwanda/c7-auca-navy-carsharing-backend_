@@ -3,7 +3,7 @@ import { Opaque } from 'type-fest'
 
 import { validate } from 'src/util'
 
-import { CarID } from '../car'
+import { CarID } from '../car/car'
 import { UserID } from '../user'
 
 import { BookingState } from './booking-state'
