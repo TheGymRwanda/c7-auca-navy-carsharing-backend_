@@ -134,6 +134,8 @@ export class CarController {
 
   @ApiOperation({
     summary: 'Update an existing car.',
+    description:
+      'Updates an existing car, or allow the renter of a car to change the car state.',
   })
   @ApiOkResponse({
     description: 'The car was updated.',

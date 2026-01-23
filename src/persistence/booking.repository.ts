@@ -8,6 +8,7 @@ import {
   CarID,
   UserID,
   BookingNotFoundError,
+  AccessDeniedError,
 } from 'src/application'
 import { BookingState } from 'src/application/booking/booking-state'
 import { IBookingRepository } from 'src/application/booking/booking.repository.interface'
@@ -19,8 +20,8 @@ type Row = {
   car_id: CarID
   state: BookingState
   renter_id: UserID
-  start_date: string
-  end_date: string
+  start_date: Date
+  end_date: Date
 }
 
 function rowToDomain(row: Row) {
@@ -29,7 +30,7 @@ function rowToDomain(row: Row) {
     carId: row.car_id,
     state: row.state as BookingState,
     renterId: row.renter_id,
-    startDate: row.start_date,
+    startDate: new Date(row.start_date),
     endDate: row.end_date,
   })
 }
@@ -46,6 +47,21 @@ export class BookingRepository extends IBookingRepository {
     }
     return rowToDomain(row)
   }
+  public async findRenterBooking(
+    _tx: Transaction,
+    renterId: UserID,
+    carId: CarID,
+  ): Promise<boolean> {
+    const row = await _tx.manyOrNone<Row>(
+      `SELECT * FROM bookings WHERE renter_id = $(renterId) AND car_id = $(carId)`,
+      { renterId, carId },
+    )
+    if (row === null || row.length === 0) {
+      throw new AccessDeniedError('User is not a renter', renterId)
+    }
+    return true
+  }
+
   public async get(_tx: Transaction, id: BookingID): Promise<Booking> {
     const booking = await this.find(_tx, id)
     if (!booking) throw new BookingNotFoundError(id)

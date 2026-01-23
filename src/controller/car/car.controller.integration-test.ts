@@ -201,5 +201,19 @@ describe('CarController', () => {
         .expect(HttpStatus.OK)
         .expect({ ...car })
     })
+
+    it('should update the state an existing car', async () => {
+      const car = new CarBuilder().withId(7).build()
+      const updatedState = CarState.UNLOCKED
+      carServiceMock.update.mockResolvedValue(car)
+      authenticationGuardMock.user = UserBuilder.from(user).build()
+      await request(app.getHttpServer())
+        .patch(`/cars/${car.id}`)
+        .send({
+          state: updatedState,
+        })
+        .expect(HttpStatus.OK)
+        .expect({ ...car })
+    })
   })
 })

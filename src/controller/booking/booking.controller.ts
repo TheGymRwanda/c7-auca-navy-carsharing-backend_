@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Body,
+  UnauthorizedException,
 } from '@nestjs/common'
 import {
   ApiBearerAuth,
@@ -21,7 +22,7 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger'
 
-import { Booking, BookingID, User } from 'src/application'
+import { AccessDeniedError, Booking, BookingID, User } from 'src/application'
 import { BookingState } from 'src/application/booking/booking-state'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
 import { InvalidBookingDateError } from 'src/application/booking/invalid-booking-date.error'
@@ -30,6 +31,7 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
+import { BookingInvalidError } from 'src/application/booking/booking-invalid-error'
 
 @ApiTags(Booking.name)
 @ApiBearerAuth()
@@ -74,11 +76,22 @@ export class BookingController {
   @ApiNotFoundResponse({
     description: 'No booking with the given id was found',
   })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not allowed to access this booking',
+  })
   @Get(':id')
   public async get(
     @Param('id', ParseIntPipe) id: BookingID,
+    @CurrentUser() user: User,
   ): Promise<BookingDTO> {
-    return await this.bookingService.get(id)
+    try {
+      return await this.bookingService.get(id, user.id)
+    } catch (error) {
+      if (error instanceof AccessDeniedError) {
+        throw new UnauthorizedException(error.message)
+      }
+      throw error
+    }
   }
   @ApiOperation({
     summary: 'Create a new booking',
@@ -116,7 +129,16 @@ export class BookingController {
     @Body() data: PatchBookingDTO,
     @Param('id', ParseIntPipe) id: BookingID,
     @CurrentUser() user: User,
-  ) {
-    return await this.bookingService.update(data, id, user.id)
+  ): Promise<BookingDTO> {
+    try {
+      return await this.bookingService.update(data, id, user.id)
+    } catch (error) {
+      if (error instanceof BookingInvalidError) {
+        throw new BadRequestException(
+          'Booking state is invalid or contains unexpected data, please try again.',
+        )
+      }
+      throw error
+    }
   }
 }

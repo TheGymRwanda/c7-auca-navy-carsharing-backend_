@@ -3,7 +3,7 @@ import { Opaque } from 'type-fest'
 
 import { validate } from 'src/util'
 
-import { CarID } from '../car'
+import { CarID } from '../car/car'
 import { UserID } from '../user'
 
 import { BookingState } from './booking-state'
@@ -15,8 +15,8 @@ export type BookingProperties = {
   carId: CarID
   state: BookingState
   renterId: UserID
-  startDate: string
-  endDate: string
+  startDate: Date
+  endDate: Date
 }
 
 export class Booking {
@@ -36,10 +36,10 @@ export class Booking {
   public readonly state: BookingState
 
   @IsDate()
-  public readonly startDate: string
+  public readonly startDate: Date
 
   @IsDate()
-  public readonly endDate: string
+  public readonly endDate: Date
 
   public constructor(data: BookingProperties) {
     this.id = data.id

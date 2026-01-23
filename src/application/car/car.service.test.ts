@@ -5,15 +5,19 @@ import {
   mockDatabaseConnection,
   mockCarTypeService,
   CarTypeServiceMock,
+  BookingServiceMock,
+  mockBookingService as serviceBookingMock,
 } from '../../mocks'
 import { UserBuilder } from '../user/user.builder'
 
+import { CarState } from './car-state'
 import { CarBuilder } from './car.builder'
 import { CarService } from './car.service'
 
 describe('CarService', () => {
   let carService: CarService
   let carTypeServiceMock: CarTypeServiceMock
+  let bookingService: BookingServiceMock
   let carRepositoryMock: CarRepositoryMock
   let databaseConnectionMock: DatabaseConnectionMock
 
@@ -21,11 +25,13 @@ describe('CarService', () => {
     carRepositoryMock = mockCarRepository()
     databaseConnectionMock = mockDatabaseConnection()
     carTypeServiceMock = mockCarTypeService()
+    bookingService = serviceBookingMock()
 
     carService = new CarService(
       carTypeServiceMock,
       carRepositoryMock,
       databaseConnectionMock,
+      bookingService,
     )
   })
 
@@ -52,6 +58,18 @@ describe('CarService', () => {
 
       await expect(
         carService.update(car.id, { horsepower: 555 }, owner.id),
+      ).resolves.toEqual(updatedCar)
+    })
+
+    xit('should update a car', async () => {
+      const owner = new UserBuilder().build()
+      const car = new CarBuilder().withOwner(owner).withHorsepower(20).build()
+      const updatedCar = CarBuilder.from(car)
+        .withState(CarState.UNLOCKED)
+        .build()
+
+      await expect(
+        carService.update(car.id, { state: CarState.UNLOCKED }, owner.id),
       ).resolves.toEqual(updatedCar)
     })
 
