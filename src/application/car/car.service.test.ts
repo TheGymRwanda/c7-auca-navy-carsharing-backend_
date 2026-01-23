@@ -6,7 +6,7 @@ import {
   mockCarTypeService,
   CarTypeServiceMock,
   BookingServiceMock,
-  mockBookingService,
+  mockBookingService as serviceBookingMock,
 } from '../../mocks'
 import { UserBuilder } from '../user/user.builder'
 
@@ -25,7 +25,7 @@ describe('CarService', () => {
     carRepositoryMock = mockCarRepository()
     databaseConnectionMock = mockDatabaseConnection()
     carTypeServiceMock = mockCarTypeService()
-    bookingService = mockBookingService()
+    bookingService = serviceBookingMock()
 
     carService = new CarService(
       carTypeServiceMock,
