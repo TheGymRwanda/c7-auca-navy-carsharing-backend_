@@ -66,6 +66,14 @@ export function up(pgm: MigrationBuilder): void {
     },
   })
 
+  pgm.createType('booking_state', [
+    'PICKED_UP',
+    'PENDING',
+    'ACCEPTED',
+    'DECLINED',
+    'RETURNED',
+  ])
+
   pgm.createTable('bookings', {
     id: {
       type: 'serial',
@@ -76,7 +84,7 @@ export function up(pgm: MigrationBuilder): void {
       references: 'cars',
     },
     state: {
-      type: 'text',
+      type: 'booking_state',
       notNull: true,
     },
     renter_id: {
