@@ -33,7 +33,7 @@ services:
       - PGDATABASE=carsharing
     volumes:
       - ./fixture:/fixture:ro
-      - ./migration:/migration:ro
+      - ./migrations:/migrations:ro
     command: |
       bash -c "
       set -e
