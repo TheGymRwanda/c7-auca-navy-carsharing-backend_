@@ -134,9 +134,7 @@ export class BookingController {
       return await this.bookingService.update(data, id, user.id)
     } catch (error) {
       if (error instanceof BookingInvalidError) {
-        throw new BadRequestException(
-          'Booking state is invalid or contains unexpected data, please try again.',
-        )
+        throw new BookingInvalidError(id)
       }
       throw error
     }

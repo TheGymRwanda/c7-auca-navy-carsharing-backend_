@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { Except } from 'type-fest'
 
-import { IDatabaseConnection } from 'src/persistence/database-connection.interface'
+import {
+  IDatabaseConnection,
+  Transaction,
+} from 'src/persistence/database-connection.interface'
 
 import { AccessDeniedError } from '../access-denied.error'
 import { CarID } from '../car/car'
@@ -29,18 +32,25 @@ export class BookingService implements IBookingService {
     this.bookingRepository = bookingRepository
     this.carRepository = carRepository
   }
+  public async validateBookingAccess(
+    tx: Transaction,
+    booking: Booking,
+    currentUserId: UserID,
+  ): Promise<boolean> {
+    const car = await this.carRepository.get(tx, booking.carId)
+
+    if (booking.renterId !== currentUserId && car.ownerId !== currentUserId) {
+      throw new AccessDeniedError(
+        'You are not allowed to view this booking',
+        booking.carId,
+      )
+    }
+    return true
+  }
   public async get(id: BookingID, currentUserId: UserID): Promise<Booking> {
     return this.databaseConnection.transactional(async tx => {
       const booking = await this.bookingRepository.get(tx, id)
-      const car = await this.carRepository.get(tx, booking.carId)
-
-      if (booking.renterId !== currentUserId && car.ownerId !== currentUserId) {
-        throw new AccessDeniedError(
-          'You are not allowed to view this booking',
-          booking.carId,
-        )
-      }
-
+      await this.validateBookingAccess(tx, booking, currentUserId)
       return booking
     })
   }
@@ -118,13 +128,16 @@ export class BookingService implements IBookingService {
           booking.carId,
         )
       }
-      const bookingState = _updates.state as BookingState
-      this.validateBooking(bookingState, booking)
-      const updateBooking = {
-        ...booking,
-        ..._updates,
+      if (_updates.state) {
+        const bookingState = _updates.state
+        this.validateBooking(bookingState, booking)
+        const updateBooking = {
+          ...booking,
+          ..._updates,
+        }
+        return this.bookingRepository.update(_tx, updateBooking)
       }
-      return this.bookingRepository.update(_tx, updateBooking)
+      throw new BookingInvalidError(bookingId)
     })
   }
 }
