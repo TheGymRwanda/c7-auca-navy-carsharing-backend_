@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger'
 
 import { AccessDeniedError, Booking, BookingID, User } from 'src/application'
+import { BookingInvalidError } from 'src/application/booking/booking-invalid-error'
 import { BookingState } from 'src/application/booking/booking-state'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
 import { InvalidBookingDateError } from 'src/application/booking/invalid-booking-date.error'
@@ -31,7 +32,6 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
-import { BookingInvalidError } from 'src/application/booking/booking-invalid-error'
 
 @ApiTags(Booking.name)
 @ApiBearerAuth()

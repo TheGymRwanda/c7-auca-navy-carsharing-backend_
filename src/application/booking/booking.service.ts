@@ -51,36 +51,34 @@ export class BookingService implements IBookingService {
     )
   }
 
-public async create(
-  _data: Except<BookingProperties, 'id'>,
-): Promise<Booking> {
-  const { carId, startDate, endDate } = _data;
+  public async create(
+    _data: Except<BookingProperties, 'id'>,
+  ): Promise<Booking> {
+    const { carId, startDate, endDate } = _data
 
-  
-  if (new Date(startDate) > new Date(endDate)) {
-    throw new InvalidBookingDateError(
-      'The start date cannot be after the end date',
-    );
-  }
-
-   return this.databaseConnection.transactional(async tx => {
-    const overlappingBooking =
-      await this.bookingRepository.findOverlappingBooking(
-        tx,
-        carId,
-        new Date(startDate),
-        new Date(endDate),
-      );
-
-    if (overlappingBooking) {
+    if (new Date(startDate) > new Date(endDate)) {
       throw new InvalidBookingDateError(
-        'This car is already booked for the selected time period',
-      );
+        'The start date cannot be after the end date',
+      )
     }
 
-    
-    return this.bookingRepository.insert(tx, _data);
-  });
+    return this.databaseConnection.transactional(async tx => {
+      const overlappingBooking =
+        await this.bookingRepository.findOverlappingBooking(
+          tx,
+          carId,
+          new Date(startDate),
+          new Date(endDate),
+        )
+
+      if (overlappingBooking) {
+        throw new InvalidBookingDateError(
+          'This car is already booked for the selected time period',
+        )
+      }
+
+      return this.bookingRepository.insert(tx, _data)
+    })
   }
 
   public async findRenterBooking(
