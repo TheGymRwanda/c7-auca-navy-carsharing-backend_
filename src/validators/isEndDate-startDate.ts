@@ -2,18 +2,16 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
-} from 'class-validator';
+} from 'class-validator'
 
 @ValidatorConstraint({ name: 'isEndDateAfterStartDate', async: false })
-export class IsEndDateAfterStartDate
-  implements ValidatorConstraintInterface
-{
+export class IsEndDateAfterStartDate implements ValidatorConstraintInterface {
   validate(endDate: string, args: ValidationArguments) {
-    const startDate = (args.object as any).startDate;
-    return new Date(endDate) > new Date(startDate);
+    const startDate = (args.object as { startDate: string | Date }).startDate
+    return new Date(endDate) > new Date(startDate)
   }
 
   defaultMessage() {
-    return 'endDate must be after startDate';
+    return 'endDate must be after startDate'
   }
 }
