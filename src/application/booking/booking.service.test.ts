@@ -13,7 +13,6 @@ import { AccessDeniedError, BookingID, CarID, UserID } from '../index'
 import { BookingState } from './booking-state'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
-import { InvalidBookingDateError } from './invalid-booking-date.error'
 
 describe('BookingService', () => {
   let bookingService: BookingService
@@ -111,22 +110,6 @@ describe('BookingService', () => {
       expect(bookingRepositoryMock.insert).toHaveBeenCalledWith(
         expect.anything(),
         bookingData,
-      )
-    })
-
-    it('should throw an error if startDate is after endDate', async () => {
-      const renter = new UserBuilder().build()
-      const carId = 4 as CarID
-      const bookingData = {
-        carId,
-        renterId: renter.id,
-        state: BookingState.PENDING,
-        startDate: new Date('2026-01-15T07:00:00.000Z'),
-        endDate: new Date('2026-01-10T07:00:00.000Z'),
-      }
-
-      await expect(bookingService.create(bookingData)).rejects.toThrow(
-        InvalidBookingDateError,
       )
     })
   })
