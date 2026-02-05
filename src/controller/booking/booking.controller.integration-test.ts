@@ -9,7 +9,6 @@ import {
   CarID,
   IBookingService,
   UserID,
-  InvalidBookingDateError,
 } from 'src/application'
 import { BookingState } from 'src/application/booking/booking-state'
 import { BookingBuilder, UserBuilder } from 'src/builders'
