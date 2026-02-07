@@ -66,12 +66,6 @@ export class BookingService implements IBookingService {
   ): Promise<Booking> {
     const { carId, startDate, endDate } = _data
 
-    if (new Date(startDate) > new Date(endDate)) {
-      throw new InvalidBookingDateError(
-        'The start date cannot be after the end date',
-      )
-    }
-
     return this.databaseConnection.transactional(async tx => {
       const overlappingBooking =
         await this.bookingRepository.findOverlappingBooking(

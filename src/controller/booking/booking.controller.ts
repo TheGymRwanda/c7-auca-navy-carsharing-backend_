@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Controller,
   Get,
   Param,
@@ -26,7 +25,6 @@ import { AccessDeniedError, Booking, BookingID, User } from 'src/application'
 import { BookingInvalidError } from 'src/application/booking/booking-invalid-error'
 import { BookingState } from 'src/application/booking/booking-state'
 import { IBookingService } from 'src/application/booking/booking.service.interface'
-import { InvalidBookingDateError } from 'src/application/booking/invalid-booking-date.error'
 
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
@@ -109,19 +107,12 @@ export class BookingController {
     @Body() data: CreateBookingDTO,
     @CurrentUser() user: User,
   ): Promise<BookingDTO> {
-    try {
-      const booking = await this.bookingService.create({
-        ...data,
-        renterId: user.id,
-        state: BookingState.PENDING,
-      })
-      return BookingDTO.fromModel(booking)
-    } catch (error) {
-      if (error instanceof InvalidBookingDateError) {
-        throw new BadRequestException(error.message)
-      }
-      throw error
-    }
+    const booking = await this.bookingService.create({
+      ...data,
+      renterId: user.id,
+      state: BookingState.PENDING,
+    })
+    return BookingDTO.fromModel(booking)
   }
 
   @Patch(':id')

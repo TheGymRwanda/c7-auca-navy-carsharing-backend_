@@ -9,7 +9,6 @@ import {
   CarID,
   IBookingService,
   UserID,
-  InvalidBookingDateError,
 } from 'src/application'
 import { BookingState } from 'src/application/booking/booking-state'
 import { BookingBuilder, UserBuilder } from 'src/builders'
@@ -249,12 +248,6 @@ describe('BookingController', () => {
     })
 
     it('should return 400 when startDate is after endDate', async () => {
-      bookingServiceMock.create.mockRejectedValue(
-        new InvalidBookingDateError(
-          'The start date cannot be after the end date',
-        ),
-      )
-
       await request(app.getHttpServer())
         .post('/bookings')
         .send({
