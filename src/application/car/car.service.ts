@@ -88,6 +88,18 @@ export class CarService implements ICarService {
     return false
   }
 
+  public async verifyUpdateCarAccess(
+    car: Car,
+    tx: Transaction,
+    _updates: Partial<Except<CarProperties, 'id'>>,
+    _currentUserId: UserID,
+  ) {
+    if (await this.isRenter(car.id, _currentUserId, _updates)) return
+    if (_currentUserId !== car.ownerId) {
+      throw new AccessDeniedError(car.name, car.id)
+    }
+    await this.checkLicenseExists(tx, car.licensePlate)
+  }
   public async update(
     _carId: CarID,
     _updates: Partial<Except<CarProperties, 'id'>>,
@@ -95,19 +107,12 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       const car = await this.get(_carId)
+      await this.verifyUpdateCarAccess(car, tx, _updates, _currentUserId)
       const updatedCar = new Car({
         ...car,
         ..._updates,
         id: _carId,
       })
-      const checkRenter = await this.isRenter(_carId, _currentUserId, _updates)
-      if (checkRenter) {
-        return this.carRepository.update(tx, updatedCar)
-      }
-      if (_currentUserId !== updatedCar.ownerId) {
-        throw new AccessDeniedError(car.name, car.id)
-      }
-      await this.checkLicenseExists(tx, car.licensePlate)
       return this.carRepository.update(tx, updatedCar)
     })
   }

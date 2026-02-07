@@ -24,11 +24,10 @@ export abstract class IBookingRepository {
 
   public abstract update(_tx: Transaction, booking: Booking): Promise<Booking>
 
-   
   public abstract findOverlappingBooking(
     _tx: Transaction,
     carId: number,
     startDate: Date,
     endDate: Date,
-  ): Promise<Booking | null>;
+  ): Promise<Booking | null>
 }

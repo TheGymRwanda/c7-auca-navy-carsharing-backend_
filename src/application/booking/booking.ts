@@ -1,5 +1,5 @@
 import { IsDate, IsEnum, IsInt, IsPositive } from 'class-validator'
-import { Opaque } from 'type-fest'
+import { Tagged } from 'type-fest'
 
 import { validate } from 'src/util'
 
@@ -8,7 +8,7 @@ import { UserID } from '../user'
 
 import { BookingState } from './booking-state'
 
-export type BookingID = Opaque<number, 'booking-id'>
+export type BookingID = Tagged<number, 'booking-id'>
 
 export type BookingProperties = {
   id: BookingID

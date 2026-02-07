@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotImplementedException } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import {
@@ -47,6 +47,16 @@ export class BookingRepository extends IBookingRepository {
     }
     return rowToDomain(row)
   }
+
+  public findOverlappingBooking(
+    _tx: Transaction,
+    carId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Booking | null> {
+    throw new NotImplementedException()
+  }
+
   public async findRenterBooking(
     _tx: Transaction,
     renterId: UserID,
@@ -99,11 +109,7 @@ export class BookingRepository extends IBookingRepository {
        VALUES ($(carId), $(state), $(renterId), $(startDate), $(endDate))
        RETURNING *`,
       {
-        carId: booking.carId,
-        state: booking.state,
-        renterId: booking.renterId,
-        startDate: booking.startDate,
-        endDate: booking.endDate,
+        ...booking,
       },
     )
     return rowToDomain(row)
