@@ -7,7 +7,7 @@ import { CarID, UserID, Booking } from 'src/application'
 import { type BookingID } from 'src/application/booking/booking'
 import { BookingState } from 'src/application/booking/booking-state'
 import { StrictPartialType, validate } from 'src/util'
-import { IsEndDateAfterStartDate } from 'src/validators/isEndDate-startDate'
+import { IsEndDateAfterStartDate } from 'src/validators/is-end-date-start-date'
 
 export class BookingDTO {
   @ApiProperty({
