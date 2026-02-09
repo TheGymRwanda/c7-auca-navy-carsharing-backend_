@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { Except } from 'type-fest'
 
-import { IDatabaseConnection } from 'src/persistence/database-connection.interface'
+import {
+  IDatabaseConnection,
+  Transaction,
+} from 'src/persistence/database-connection.interface'
 
 import { AccessDeniedError } from '../access-denied.error'
 import { CarID } from '../car/car'
@@ -29,18 +32,25 @@ export class BookingService implements IBookingService {
     this.bookingRepository = bookingRepository
     this.carRepository = carRepository
   }
+  public async validateBookingAccess(
+    tx: Transaction,
+    booking: Booking,
+    currentUserId: UserID,
+  ): Promise<boolean> {
+    const car = await this.carRepository.get(tx, booking.carId)
+
+    if (booking.renterId !== currentUserId && car.ownerId !== currentUserId) {
+      throw new AccessDeniedError(
+        'You are not allowed to view this booking',
+        booking.carId,
+      )
+    }
+    return true
+  }
   public async get(id: BookingID, currentUserId: UserID): Promise<Booking> {
     return this.databaseConnection.transactional(async tx => {
       const booking = await this.bookingRepository.get(tx, id)
-      const car = await this.carRepository.get(tx, booking.carId)
-
-      if (booking.renterId !== currentUserId && car.ownerId !== currentUserId) {
-        throw new AccessDeniedError(
-          'You are not allowed to view this booking',
-          booking.carId,
-        )
-      }
-
+      await this.validateBookingAccess(tx, booking, currentUserId)
       return booking
     })
   }
@@ -51,36 +61,28 @@ export class BookingService implements IBookingService {
     )
   }
 
-public async create(
-  _data: Except<BookingProperties, 'id'>,
-): Promise<Booking> {
-  const { carId, startDate, endDate } = _data;
+  public async create(
+    _data: Except<BookingProperties, 'id'>,
+  ): Promise<Booking> {
+    const { carId, startDate, endDate } = _data
 
-  
-  if (new Date(startDate) > new Date(endDate)) {
-    throw new InvalidBookingDateError(
-      'The start date cannot be after the end date',
-    );
-  }
+    return this.databaseConnection.transactional(async tx => {
+      const overlappingBooking =
+        await this.bookingRepository.findOverlappingBooking(
+          tx,
+          carId,
+          new Date(startDate),
+          new Date(endDate),
+        )
 
-   return this.databaseConnection.transactional(async tx => {
-    const overlappingBooking =
-      await this.bookingRepository.findOverlappingBooking(
-        tx,
-        carId,
-        new Date(startDate),
-        new Date(endDate),
-      );
+      if (overlappingBooking) {
+        throw new InvalidBookingDateError(
+          'This car is already booked for the selected time period',
+        )
+      }
 
-    if (overlappingBooking) {
-      throw new InvalidBookingDateError(
-        'This car is already booked for the selected time period',
-      );
-    }
-
-    
-    return this.bookingRepository.insert(tx, _data);
-  });
+      return this.bookingRepository.insert(tx, _data)
+    })
   }
 
   public async findRenterBooking(
@@ -120,13 +122,16 @@ public async create(
           booking.carId,
         )
       }
-      const bookingState = _updates.state as BookingState
-      this.validateBooking(bookingState, booking)
-      const updateBooking = {
-        ...booking,
-        ..._updates,
+      if (_updates.state) {
+        const bookingState = _updates.state
+        this.validateBooking(bookingState, booking)
+        const updateBooking = {
+          ...booking,
+          ..._updates,
+        }
+        return this.bookingRepository.update(_tx, updateBooking)
       }
-      return this.bookingRepository.update(_tx, updateBooking)
+      throw new BookingInvalidError(bookingId)
     })
   }
 }
