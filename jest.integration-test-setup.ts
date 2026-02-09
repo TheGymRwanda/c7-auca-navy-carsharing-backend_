@@ -10,6 +10,8 @@ import {
 import * as glob from 'glob'
 import pgPromise, { IDatabase } from 'pg-promise'
 
+import { Role } from 'src/application/authorization/role.enum'
+
 import {
   Booking,
   BookingID,
@@ -24,6 +26,7 @@ import {
   BookingState,
 } from './src/application'
 import { DatabaseConnectionConfig, type Transaction } from './src/persistence'
+
 
 const execFile = promisify(execFileCallback)
 
@@ -71,18 +74,21 @@ export const users = {
     name: 'Beatrice',
     passwordHash:
       'f38f5587a7dfb8c8f853b32f7235307c867cdd19109778a051891be5d8d4892cf2aa9a128d63409572f1d181d5aa77c0977ece42717aef7aa0506f61ed94fd7d',
+    role: Role.admin,
   }),
   bob: new User({
     id: 2 as UserID,
     name: 'Bob',
     passwordHash:
       '19f58557744d2a919c47266f092e21dbe5fbfd7c930599033562420cb471abf4454442f4e097304523d462e7770a3fe2a0ac04e1e11a13a32932f1c0db886ffd',
+    role: Role.user,
   }),
   izzedin: new User({
     id: 3 as UserID,
     name: 'Izzedin',
     passwordHash:
       '3253659812d15922fe8c2d300fd7a7ce4466ddcdb6f24f52e83769d1ce32d43d124022e297693ff720c99fda96675f68843b054ac27f2efc7a6fc70096e256d4',
+    role: Role.user,
   }),
 }
 

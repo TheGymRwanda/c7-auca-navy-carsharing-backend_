@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { Role } from 'src/application/authorization/role.enum'
+
 import {
   type IUserRepository,
   User,
@@ -19,6 +21,7 @@ type Row = {
   id: number
   name: string
   password: string
+  role: Role
 }
 
 function rowToDomain(row: Row): User {
@@ -26,6 +29,7 @@ function rowToDomain(row: Row): User {
     id: row.id as UserID,
     name: row.name,
     passwordHash: row.password,
+    role: row.role,
   })
 }
 
