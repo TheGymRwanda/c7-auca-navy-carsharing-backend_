@@ -24,4 +24,6 @@ export abstract class IBookingService {
     bookingId: BookingID,
     currentUserId: UserID,
   ): Promise<Booking>
+
+  public abstract delete(bookingId: BookingID): Promise<void>
 }

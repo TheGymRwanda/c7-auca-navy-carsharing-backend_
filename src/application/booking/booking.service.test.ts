@@ -114,6 +114,38 @@ describe('BookingService', () => {
     })
   })
 
+  describe('delete', () => {
+    it('should delete a booking with a state that is not picked up', async () => {
+      const renter = new UserBuilder().build()
+      const carId = 4 as CarID
+      const booking1 = new BookingBuilder()
+        .withId(2)
+        .withCarId(carId)
+        .withRenterId(renter.id)
+        .withState(BookingState.PENDING)
+        .withStartDate('2026-01-10T07:00:00.000Z')
+        .withEndDate('2026-01-15T07:00:00.000Z')
+        .build()
+      const result = await bookingService.delete(booking1.id)
+      expect(result).pass
+    })
+
+    it('should not delete a booking in the picked up state', async () => {
+      const renter = new UserBuilder().build()
+      const carId = 4 as CarID
+      const booking1 = new BookingBuilder()
+        .withId(2)
+        .withCarId(carId)
+        .withRenterId(renter.id)
+        .withState(BookingState.PICKED_UP)
+        .withStartDate('2026-01-10T07:00:00.000Z')
+        .withEndDate('2026-01-15T07:00:00.000Z')
+        .build()
+      const result = await bookingService.delete(booking1.id)
+      expect(result).fail
+    })
+  })
+
   describe('update', () => {
     xit('should update a booking', async () => {
       const renter = new UserBuilder().build()

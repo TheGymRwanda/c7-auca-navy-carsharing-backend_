@@ -8,6 +8,7 @@ export function mockBookingService(): BookingServiceMock {
     getAll: jest.fn(),
     create: jest.fn(),
     findRenterBooking: jest.fn(),
+    delete: jest.fn(),
     update: jest.fn(),
   }
 }
