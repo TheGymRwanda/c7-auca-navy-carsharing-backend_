@@ -58,6 +58,11 @@ export class UserBuilder {
     return this
   }
 
+  public withRole(role: Role) {
+    this.properties.role = role
+    return this
+  }
+
   public withPasswordHash(passwordHash: string): this {
     this.properties.passwordHash = passwordHash
     return this

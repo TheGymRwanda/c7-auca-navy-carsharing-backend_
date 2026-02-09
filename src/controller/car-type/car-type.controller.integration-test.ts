@@ -2,6 +2,8 @@ import { HttpStatus, INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 
+import { Role } from 'src/application/authorization/role.enum'
+
 import {
   type CarTypeID,
   CarTypeNotFoundError,
@@ -118,7 +120,7 @@ describe('CarTypeController', () => {
   })
 
   // Re-enable this test when you're implementing "Rights and Roles - Module 1".
-  describe.skip('create', () => {
+  describe('create', () => {
     it('should fail if the user is not an administrator', async () => {
       await request(app.getHttpServer())
         .post(`/car-types`)
@@ -136,7 +138,9 @@ describe('CarTypeController', () => {
       carTypeServiceMock.create.mockResolvedValue(newCarType)
 
       // TODO: You have to turn the user into an administrator here for the test to pass!
-      authenticationGuardMock.user = UserBuilder.from(user).build()
+      authenticationGuardMock.user = UserBuilder.from(user)
+        .withRole(Role.admin)
+        .build()
 
       await request(app.getHttpServer())
         .post(`/car-types`)
