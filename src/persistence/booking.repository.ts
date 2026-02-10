@@ -48,12 +48,7 @@ export class BookingRepository extends IBookingRepository {
     return rowToDomain(row)
   }
 
-  public findOverlappingBooking(
-    _tx: Transaction,
-    carId: number,
-    startDate: Date,
-    endDate: Date,
-  ): Promise<Booking | null> {
+  public findOverlappingBooking(_tx: Transaction): Promise<Booking | null> {
     throw new NotImplementedException()
   }
 

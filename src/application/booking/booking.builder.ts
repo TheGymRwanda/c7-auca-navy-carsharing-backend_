@@ -34,15 +34,13 @@ export class BookingBuilder {
       const value = properties[key]
 
       if (value !== undefined) {
-        if (key === 'startDate' || key === 'endDate') {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          this.properties[key] = new Date(value as string)
-        } else {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          this.properties[key] = value
-        }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        key === 'startDate' || key === 'endDate'
+          ? (this.properties[key] = new Date(value as string))
+          : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            (this.properties[key] = value)
       }
     }
 
