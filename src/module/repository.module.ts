@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common'
 
+import { IBookingRepository } from 'src/application/booking/booking.repository.interface'
+import { BookingRepository } from 'src/persistence/booking.repository'
+
 import {
   ICarRepository,
   ICarTypeRepository,
@@ -25,7 +28,16 @@ import {
       provide: IUserRepository,
       useClass: UserRepository,
     },
+    {
+      provide: IBookingRepository,
+      useClass: BookingRepository,
+    },
   ],
-  exports: [ICarRepository, ICarTypeRepository, IUserRepository],
+  exports: [
+    ICarRepository,
+    ICarTypeRepository,
+    IUserRepository,
+    IBookingRepository,
+  ],
 })
 export class RepositoryModule {}

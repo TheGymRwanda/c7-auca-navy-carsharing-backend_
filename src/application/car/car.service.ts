@@ -6,6 +6,7 @@ import {
   Transaction,
 } from '../../persistence/database-connection.interface'
 import { AccessDeniedError } from '../access-denied.error'
+import { IBookingService } from '../booking'
 import { ICarTypeService } from '../car-type'
 import { type UserID } from '../user'
 
@@ -18,16 +19,19 @@ export class CarService implements ICarService {
   private readonly carRepository: ICarRepository
   private readonly databaseConnection: IDatabaseConnection
   private readonly carTypeService: ICarTypeService
+  private readonly bookingService: IBookingService
   private readonly logger: Logger
 
   public constructor(
     carTypeService: ICarTypeService,
     carRepository: ICarRepository,
     databaseConnection: IDatabaseConnection,
+    bookingService: IBookingService,
   ) {
     this.carRepository = carRepository
     this.databaseConnection = databaseConnection
     this.carTypeService = carTypeService
+    this.bookingService = bookingService
     this.logger = new Logger(CarService.name)
   }
 
@@ -67,6 +71,35 @@ export class CarService implements ICarService {
     }
   }
 
+  public async isRenter(
+    carId: CarID,
+    renterId: UserID,
+    updates: Partial<Except<CarProperties, 'id'>>,
+  ) {
+    const checkRenter = await this.bookingService.findRenterBooking(
+      carId,
+      renterId,
+    )
+    if (checkRenter !== null) {
+      const checkIfPropertiesExceptStateExists =
+        updates.info || updates.name || updates.licensePlate
+      return checkIfPropertiesExceptStateExists ? false : true
+    }
+    return false
+  }
+
+  public async verifyUpdateCarAccess(
+    car: Car,
+    tx: Transaction,
+    _updates: Partial<Except<CarProperties, 'id'>>,
+    _currentUserId: UserID,
+  ) {
+    if (await this.isRenter(car.id, _currentUserId, _updates)) return
+    if (_currentUserId !== car.ownerId) {
+      throw new AccessDeniedError(car.name, car.id)
+    }
+    await this.checkLicenseExists(tx, car.licensePlate)
+  }
   public async update(
     _carId: CarID,
     _updates: Partial<Except<CarProperties, 'id'>>,
@@ -74,15 +107,12 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       const car = await this.get(_carId)
-      await this.checkLicenseExists(tx, car.licensePlate)
+      await this.verifyUpdateCarAccess(car, tx, _updates, _currentUserId)
       const updatedCar = new Car({
         ...car,
         ..._updates,
         id: _carId,
       })
-      if (_currentUserId !== updatedCar.ownerId) {
-        throw new AccessDeniedError(car.name, car.id)
-      }
       return this.carRepository.update(tx, updatedCar)
     })
   }
