@@ -1,7 +1,16 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -13,6 +22,7 @@ import {
 import { IUserService, User, type UserID } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 
+import { CreateUserDTO } from './create-user.dto'
 import { UserDTO } from './user.dto'
 
 /**********************************************************************************************************************\
@@ -76,6 +86,24 @@ export class UserController {
   @Get(':id')
   public async get(@Param('id', ParseIntPipe) id: UserID): Promise<UserDTO> {
     const user = await this.userService.get(id)
+
+    return UserDTO.fromModel(user)
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Register a new user.',
+  })
+  @ApiCreatedResponse({
+    description: 'The user has been successfully created.',
+    type: UserDTO,
+  })
+  @ApiBadRequestResponse({
+    description: 'The request was malformed.',
+  })
+  @Post()
+  public async create(@Body() body: CreateUserDTO): Promise<UserDTO> {
+    const user = await this.userService.create(body)
 
     return UserDTO.fromModel(user)
   }
