@@ -33,7 +33,6 @@ import { RolesGuard } from '../role.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
 
-
 @ApiTags(Booking.name)
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
