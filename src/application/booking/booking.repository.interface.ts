@@ -24,6 +24,8 @@ export abstract class IBookingRepository {
 
   public abstract update(_tx: Transaction, booking: Booking): Promise<Booking>
 
+  public abstract delete(_tx: Transaction, bookingId: BookingID): Promise<void>
+
   public abstract findOverlappingBooking(
     _tx: Transaction,
     carId: number,

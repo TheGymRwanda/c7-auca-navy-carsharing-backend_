@@ -9,6 +9,7 @@ export function mockBookingRepository() {
     insert: jest.fn(),
     findRenterBooking: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
     findOverlappingBooking: jest.fn(),
   }
 }

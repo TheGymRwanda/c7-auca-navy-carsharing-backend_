@@ -8,6 +8,7 @@ import {
   Post,
   Body,
   UnauthorizedException,
+  Delete,
 } from '@nestjs/common'
 import {
   ApiBearerAuth,
@@ -28,6 +29,7 @@ import { IBookingService } from 'src/application/booking/booking.service.interfa
 
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
+import { RolesGuard } from '../role.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
 
@@ -129,5 +131,24 @@ export class BookingController {
       }
       throw error
     }
+  }
+
+  @ApiOperation({
+    summary: 'Delete a booking with a specific id that is not picked up.',
+  })
+  @ApiOkResponse({
+    description: 'The booking was successfully deleted.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The request was malformed, e.g. invalid params or property in request body',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not allowed to delete this booking',
+  })
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  public async delete(@Param('id', ParseIntPipe) id: BookingID) {
+    return await this.bookingService.delete(id)
   }
 }

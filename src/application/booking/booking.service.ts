@@ -13,6 +13,7 @@ import { UserID } from '../user'
 
 import { Booking, BookingID, BookingProperties } from './booking'
 import { BookingInvalidError } from './booking-invalid-error'
+import { BookingNotFoundError } from './booking-not-found.error'
 import { BookingState } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
@@ -132,6 +133,17 @@ export class BookingService implements IBookingService {
         return this.bookingRepository.update(_tx, updateBooking)
       }
       throw new BookingInvalidError(bookingId)
+    })
+  }
+
+  public async delete(bookingId: BookingID) {
+    await this.databaseConnection.transactional(async tx => {
+      const booking = await this.bookingRepository.get(tx, bookingId)
+      if (!booking) throw new BookingNotFoundError(bookingId)
+      if (booking.state === BookingState.PICKED_UP) {
+        throw new BookingInvalidError(bookingId)
+      }
+      return await this.bookingRepository.delete(tx, bookingId)
     })
   }
 }

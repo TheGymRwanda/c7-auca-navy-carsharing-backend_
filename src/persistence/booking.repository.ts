@@ -109,4 +109,10 @@ export class BookingRepository extends IBookingRepository {
     )
     return rowToDomain(row)
   }
+
+  public async delete(_tx: Transaction, bookingId: BookingID): Promise<void> {
+    return await _tx.query(`DELETE FROM bookings WHERE id = $(bookingId)`, {
+      bookingId,
+    })
+  }
 }

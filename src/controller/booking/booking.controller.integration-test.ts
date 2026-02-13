@@ -42,7 +42,7 @@ describe('BookingController', () => {
     id: 12,
     carId: 4 as CarID,
     renterId: 7 as UserID,
-    state: BookingState.PENDING,
+    state: BookingState.PICKED_UP,
     startDate: new Date('2026-02-10T07:00:00.000Z'),
     endDate: new Date('2026-02-15T07:00:00.000Z'),
   }).build()
@@ -256,6 +256,20 @@ describe('BookingController', () => {
           endDate: '2026-03-10T07:00:00.000Z',
         })
         .expect(HttpStatus.BAD_REQUEST)
+    })
+  })
+
+  describe('getAll', () => {
+    it('should delete a booking', async () => {
+      await request(app.getHttpServer())
+        .post('/bookings/14')
+        .expect(HttpStatus.OK)
+    })
+
+    it('should not delete a booking that is already picked up', async () => {
+      await request(app.getHttpServer())
+        .post('/bookings/12')
+        .expect(HttpStatus.INTERNAL_SERVER_ERROR)
     })
   })
 
